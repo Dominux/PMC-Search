@@ -1,13 +1,13 @@
-import { Axios, AxiosResponse } from "axios"
+export default class ApiClient {
+  private proxyUrl = "https://cors-anywhere.herokuapp.com/"
+  baseUrl: URL
 
-export class ApiClient {
-  private client: Axios
+	constructor(baseUrl: string) {
+    this.baseUrl = new URL(baseUrl, new URL(this.proxyUrl))
+	}
 
-  constructor(baseUrl: string) {
-    this.client = new Axios({baseURL: baseUrl})
-  }
-
-  async get(url: string): Promise<AxiosResponse> {
-    return await this.client.get(url)
-  }
+	async get(query: string): Promise<Response> {
+    const innerUrl = new URL(this.baseUrl)
+		return await fetch(innerUrl.toString())
+	}
 }
