@@ -21,15 +21,14 @@
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
 
-  import ApiClient from './api_client'
+  import pmcClient from './webdbs_clients/pmc_client';
+  import pubmedClient from './webdbs_clients/pubmed_client';
 
   let query: string = ''
-  const api_client = new ApiClient(
-    "/?db=pubmed"
-  )
 
   async function search() {
-    const response = await api_client.get(query)
-    console.log(response)
+    const pmcResults = await pmcClient.search(query)
+    const pubmedResults = await pubmedClient.search(query)
+    console.log(pmcResults, pubmedResults)
   }
 </script>

@@ -1,13 +1,13 @@
-export default class ApiClient {
-  private proxyUrl = "https://cors-anywhere.herokuapp.com/"
-  baseUrl: URL
+/** Abstraction to make requests */ 
+export class ApiClient {
+	private proxyUrl = 'https://fast-cors.herokuapp.com'
+	// private proxyUrl = 'http://localhost:8000'
 
-	constructor(baseUrl: string) {
-    this.baseUrl = new URL(baseUrl, new URL(this.proxyUrl))
-	}
-
-	async get(query: string): Promise<Response> {
-    const innerUrl = new URL(this.baseUrl)
-		return await fetch(innerUrl.toString())
+	async get(url: string): Promise<Response> {
+		return await fetch(`${this.proxyUrl}/${url}`)
 	}
 }
+
+const apiClient = new ApiClient()
+
+export default apiClient
