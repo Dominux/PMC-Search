@@ -21,14 +21,11 @@
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
 
-  import pmcClient from './webdbs_clients/pmc_client';
-  import pubmedClient from './webdbs_clients/pubmed_client';
+  import searcher from './searcher'
 
   let query: string = ''
 
   async function search() {
-    const pmcResults = await pmcClient.search(query)
-    const pubmedResults = await pubmedClient.search(query)
-    console.log(pmcResults, pubmedResults)
+    await searcher.search(query)
   }
 </script>
