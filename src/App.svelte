@@ -21,11 +21,14 @@
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
 
-  import searcher from './searcher'
+  import searcher from './web_dbs/searcher'
+  import Query from './web_dbs/query'
 
   let query: string = ''
 
   async function search() {
-    await searcher.search(query)
+    const lol = new Query(query)
+    // await searcher.search(query)
+    
   }
 </script>
