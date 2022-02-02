@@ -10,18 +10,20 @@
  *
  * */
 export default class Query {
-	private query: RegExp
+	private query: Array<QueryElement>
 
 	constructor(rawQuery: string) {
 		this.query = this.compile(rawQuery)
+		console.log(this.query)
 	}
 
 	public match(text: string): Boolean {
 		return false
 	}
 
-	private compile(rawQuery: string): RegExp {
-		return QueryCompiler.compile(rawQuery)
+	private compile(rawQuery: string): Array<QueryElement> {
+		const builder = new QueryBuilder(rawQuery)
+		return builder.compile()
 	}
 }
 
@@ -29,22 +31,23 @@ enum QueryOperator {
 	And = 'AND',
 	Or = 'OR',
 	Not = 'NOT',
-	OpenedBracket = '[',
-	ClosedBracket = ']',
 }
 
-class QueryCompiler {
-	static compile(rawQuery: string): RegExp {
-		const tokens = QueryCompiler.parseToTokens(rawQuery)
-		const re = QueryCompiler.compileTokens(tokens)
-		return new RegExp(re, 'gi')
+type QueryElement = QueryOperator | string | Array<QueryElement>
+
+class QueryBuilder {
+	constructor(public rawQuery: string) {}
+
+	compile(): Array<QueryElement> {
+		const tokens = this.parseToTokens(this.rawQuery)
+		return this.compileTokens(tokens)
 	}
 
 	/**
 	 * rawQuery looks like:
 	 *  human AND protein OR apple OR [human AND [apple OR rat]] AND sugar AND [breast cancer AND lol]
 	 */
-	static parseToTokens(rawQuery: string): Array<string> {
+	private parseToTokens(rawQuery: string): Array<string> {
 		// Putting space after every '[' and before every ']' symbol
 		rawQuery = rawQuery.replaceAll('[', '[ ')
 		rawQuery = rawQuery.replaceAll(']', ' ]')
@@ -52,52 +55,38 @@ class QueryCompiler {
 		return rawQuery.split(' ')
 	}
 
-	static compileTokens(tokens: Array<string>): string {
-		let operator: QueryOperator | null
-		let subquery: Array<string>
+	private compileTokens(tokens: Array<string>): Array<QueryElement> {
+		let openedBracketsAmount = 0
+		let subquery: Array<string> = []
+		let query: Array<QueryElement> = []
 
-		return tokens.reduce((previous, current) => {
-			if (
-				operator == QueryOperator.OpenedBracket &&
-				current != QueryOperator.ClosedBracket
-			) {
-				// Constructing subquery
-				subquery.push(current)
-				return previous
-			}
+		tokens.forEach((token) => {
+			if (token === '[') {
 
-			switch (current) {
-				case QueryOperator.And:
-				case QueryOperator.Or:
-				case QueryOperator.Not:
-					operator = current
-					break
+				openedBracketsAmount++
 
-				case QueryOperator.OpenedBracket:
-					operator = current
-					break
+				if (openedBracketsAmount > 1) {
+          subquery.push(token)
+				}
 
-				case QueryOperator.ClosedBracket:
-					operator = null
-					previous += QueryCompiler.compileTokens(subquery)
+			} else if (token === ']') {
 
-				default:
-					switch (operator) {
-						case QueryOperator.And:
-							previous = `(${previous}).*${current}|${current}.*(${previous})`
-							break
-						case QueryOperator.Or:
-							previous = `((${previous})|${current})`
-							break
-						case QueryOperator.Not:
-							previous = `(?!.*${current}).*(${previous}).*$`
-							break
-						default:
-							previous = `(${previous}).*${current}|${current}.*(${previous})`
-					}
-			}
+        openedBracketsAmount--
 
-			return previous
-		}, '')
+        if (openedBracketsAmount) {
+          subquery.push(token)
+        } else {
+          query.push(this.compileTokens(subquery))
+          subquery = []
+        }
+
+      } else if (openedBracketsAmount) {
+        subquery.push(token)
+      } else {
+        query.push(token)
+      }
+		})
+
+		return query
 	}
 }
