@@ -19,7 +19,8 @@ export default class Query {
 
 	constructor(rawQuery: string) {
 		this.query = this.compile(rawQuery)
-		console.log(this.query)
+    this.queryMatcher = this.createQueryMatcher(this.query)
+		console.log(this.queryMatcher)
 	}
 
 	public match(text: string): boolean {

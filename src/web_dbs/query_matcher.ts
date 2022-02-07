@@ -1,18 +1,74 @@
-import type { QueryElement } from "./query_element"
+import { QueryOperator } from './query_element'
+import type { QueryElement } from './query_element'
+
+const RUNTIME_TYPE_CHECKING = `
+  if (typeof article !== 'string') {
+    throw TypeError('article is not type of string')
+  }
+`
 
 export default class QueryMatcher {
-  private matchingFunc: Function
+	readonly matchingFunc: Function
+  private innerVarName = 'article'
 
-  public match(): boolean {
-    return this.matchingFunc()
-  }
+	public match(): boolean {
+		return this.matchingFunc()
+	}
 
-  constructor(query: Array<QueryElement>) {
-    this.matchingFunc = this.contructMatchingFunc(query)
-  }
+	constructor(query: Array<QueryElement>) {
+		this.matchingFunc = this.buildQueryMatcher(query)
+	}
 
-  private contructMatchingFunc(query: Array<QueryElement>): Function {
-    // TODO
-    return new Function()
+	private buildQueryMatcher(query: Array<QueryElement>): Function {
+		const condition = this.createCondition(query)
+		return new Function(this.innerVarName, `${RUNTIME_TYPE_CHECKING}return ${condition}`)
+	}
+
+	private createCondition(query: Array<QueryElement>): string {
+    let resultCondition = ''
+    let operator = ''
+
+		query.forEach((element) => {
+      switch (element) {
+
+        case QueryOperator.And:
+          operator = '&&'
+          break
+
+        case QueryOperator.Or:
+          operator = '||'
+          break
+
+        case QueryOperator.Not:
+          operator = `&& !`
+          break
+
+        default:
+          // Consuming operator's value, so we get it or set default as AND operator
+          if (resultCondition) {
+            operator = operator || '&&'
+          }
+
+          if (typeof element === 'object') {
+            // Getting sub condition recursively
+            element = this.createCondition(element)
+          } else {
+            element = this.createConditionFromWord(element)
+          }
+
+          // Appending next element
+          resultCondition = `(${resultCondition} ${operator} ${element})`
+
+          // Cause we consumed it's value, we gotta empty it
+          operator = ''
+      }
+    })
+
+		return resultCondition
+	}
+
+  /** Perform converting a word into condition */
+  private createConditionFromWord(word: string): string {
+    return `${this.innerVarName}.contains("${word}")`
   }
 }
