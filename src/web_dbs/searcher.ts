@@ -1,27 +1,37 @@
 // import pmcClient from './webdbs_clients/pmc_client';
 import pubmedClient from './webdbs_clients/pubmed_client'
+import PubmedArticleParser from './parsers/pubmed_parser'
 import Query from './query/query'
 
 /* High-level searching service */
 export class Searcher {
-  /** Main function */
-  async search(rawQuery: string) {
-    // 1. Parsing raw query
-    const query = new Query(rawQuery)
+	/** Main function */
+	async search(rawQuery: string) {
+		// 1. Parsing raw query
+		const query = new Query(rawQuery)
 
-    // 2. Getting ids
-    const pubmedIds = await pubmedClient.getIds(rawQuery)
+		// 2. Getting ids
+		const pubmedIds = await pubmedClient.getIds(rawQuery)
 
-    // TODO: create awaiting for this
-    await Promise.all(pubmedIds.slice(0, 100).map(async id => {
-      // 3. Getting article
-      await pubmedClient.getArticleById(id)
+		// Getting pubmed articles, parsing and matching them
+    const result: string[] = []
+		await Promise.all(
+			pubmedIds.slice(0, 100).map(async (id) => {
+				// Getting article
+				const article = await pubmedClient.getArticleById(id)
 
-      // 4. Parsing it
-    }))
+				// Parsing it
+				const articlePart = new PubmedArticleParser().parse(article)
 
-    console.log("lol")
-  }
+        // Matching it
+        if (articlePart && query.match(articlePart)) {
+          result.push(article)
+        }
+			})
+		)
+
+		console.log('result:', result)
+	}
 }
 
 const searcher = new Searcher()

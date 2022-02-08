@@ -2,17 +2,17 @@ import { QueryOperator } from './query_element'
 import type { QueryElement } from './query_element'
 
 const RUNTIME_TYPE_CHECKING = `
-  if (typeof article !== 'string') {
-    throw TypeError('article is not type of string')
+  if (typeof articlePart !== 'string') {
+    throw TypeError('articlePart is not type of string')
   }
 `
 
 export default class QueryMatcher {
 	readonly matchingFunc: Function
-  private innerVarName = 'article'
+  private innerVarName = 'articlePart'
 
-	public match(): boolean {
-		return this.matchingFunc()
+	public match(text: string): boolean {
+		return this.matchingFunc(text)
 	}
 
 	constructor(query: Array<QueryElement>) {
@@ -69,6 +69,6 @@ export default class QueryMatcher {
 
   /** Perform converting a word into condition */
   private createConditionFromWord(word: string): string {
-    return `${this.innerVarName}.contains("${word}")`
+    return `${this.innerVarName}.includes("${word}")`
   }
 }

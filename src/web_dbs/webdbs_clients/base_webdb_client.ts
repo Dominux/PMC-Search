@@ -1,34 +1,31 @@
 import apiClient from '../api_client'
 
 interface EsearchResponseJson {
-  esearchresult: {
-    idlist: Array<string>
-  },
+	esearchresult: {
+		idlist: Array<string>
+	}
 }
 
 export default class BaseWebDBClient {
-  private baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
-  readonly esearch = new URL('esearch.fcgi', this.baseUrl)
-  readonly MAX_RETMAX = 100000
+	private baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 
-  protected db: string
-  protected articleBaseUrl: string
+	protected db: string
+	protected articleBaseUrl: string
 
-  async getIds(term: string): Promise<Array<string>> {
-    const esearch = new URL(this.esearch)
-    esearch.searchParams.append('db', this.db) // setting db to pmc
-    esearch.searchParams.append('retmode', 'json') // setting retmode to json
-    esearch.searchParams.append('retmax', this.MAX_RETMAX.toString()) // setting retmax to max value
-    esearch.searchParams.append('term', term) // setting searching term itself
+	readonly esearch = new URL('esearch.fcgi', this.baseUrl)
+	readonly MAX_RETMAX = 100000
+	readonly apiClient = apiClient
+	readonly articlePart = 'results'
 
-    const response = await apiClient.get(esearch.toString())
-    const json: EsearchResponseJson = await response.json()
-    return json.esearchresult.idlist
-  }
+	async getIds(term: string): Promise<Array<string>> {
+		const esearch = new URL(this.esearch)
+		esearch.searchParams.append('db', this.db) // setting db to pmc
+		esearch.searchParams.append('retmode', 'json') // setting retmode to json
+		esearch.searchParams.append('retmax', this.MAX_RETMAX.toString()) // setting retmax to max value
+		esearch.searchParams.append('term', term) // setting searching term itself
 
-  async getArticleById(id: string): Promise<string> {
-    const url = new URL(id, this.articleBaseUrl)
-    const response = await apiClient.get(url.toString())
-    return await response.text()
-  }
+		const response = await this.apiClient.get(esearch.toString())
+		const json: EsearchResponseJson = await response.json()
+		return json.esearchresult.idlist
+	}
 }

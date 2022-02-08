@@ -20,11 +20,10 @@ export default class Query {
 	constructor(rawQuery: string) {
 		this.query = this.compile(rawQuery)
     this.queryMatcher = this.createQueryMatcher(this.query)
-		console.log(this.queryMatcher)
 	}
 
 	public match(text: string): boolean {
-    return this.queryMatcher.match()
+    return this.queryMatcher.match(text)
 	}
 
 	private compile(rawQuery: string): Array<QueryElement> {
