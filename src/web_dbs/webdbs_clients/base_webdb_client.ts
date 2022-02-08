@@ -8,8 +8,8 @@ interface EsearchResponseJson {
 
 export default class BaseWebDBClient {
   private baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
-  private esearch = new URL('esearch.fcgi', this.baseUrl)
-  private MAX_RETMAX = 100000
+  readonly esearch = new URL('esearch.fcgi', this.baseUrl)
+  readonly MAX_RETMAX = 100000
 
   protected db: string
   protected articleBaseUrl: string

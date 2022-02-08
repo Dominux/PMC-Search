@@ -22,13 +22,10 @@
   import Fab from '@smui/fab'
 
   import searcher from './web_dbs/searcher'
-  import Query from './web_dbs/query'
 
   let query: string = ''
 
   async function search() {
-    const lol = new Query(query)
-    // await searcher.search(query)
-    
+    await searcher.search(query)
   }
 </script>
