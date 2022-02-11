@@ -13,6 +13,7 @@ export default class BaseWebDBClient {
 	protected articleBaseUrl: string
 
 	readonly esearch = new URL('esearch.fcgi', this.baseUrl)
+	readonly efetch = new URL('efetch.fcgi', this.baseUrl)
 	readonly MAX_RETMAX = 100000
 	readonly apiClient = apiClient
 	readonly articlePart = 'results'
