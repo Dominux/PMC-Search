@@ -1,6 +1,9 @@
+// Type-aliasing
+export type ID = string
+
 export default class Article {
   constructor(
-    readonly id: string,
-    readonly content: object,
+    readonly id: ID,
+    readonly content: string,
   ) {}
 }

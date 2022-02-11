@@ -1,4 +1,5 @@
 import apiClient from '../api_client'
+import type {ID} from '../article'
 
 interface EsearchResponseJson {
 	esearchresult: {
@@ -18,7 +19,7 @@ export default class BaseWebDBClient {
 	readonly apiClient = apiClient
 	readonly articlePart = 'results'
 
-	async getIds(term: string): Promise<Array<string>> {
+	async getIds(term: string): Promise<Array<ID>> {
 		const esearch = new URL(this.esearch)
 		esearch.searchParams.append('db', this.db) // setting db to pmc
 		esearch.searchParams.append('retmode', 'json') // setting retmode to json

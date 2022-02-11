@@ -1,7 +1,7 @@
-// import pmcClient from './webdbs_clients/pmc_client';
-import pubmedClient from './webdbs_clients/pubmed_client'
-import PubmedArticleParser from './parsers/pubmed_parser'
+import pmcClient from './webdbs_clients/pmc_client'
 import Query from './query/query'
+import PMCArticleParser from './parsers/pmc_parser'
+import type { ID } from './article'
 
 /* High-level searching service */
 export class Searcher {
@@ -11,26 +11,37 @@ export class Searcher {
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		const pubmedIds = await pubmedClient.getIds(rawQuery)
+		let pmcids = await pmcClient.getIds(rawQuery)
 
-		// Getting pubmed articles, parsing and matching them
-    const result: string[] = []
+		const reviewArticles: Array<ID> = []
+		const searchedArticles: Array<ID> = []
+
+    const pmcParser = new PMCArticleParser()
+
 		await Promise.all(
-			pubmedIds.slice(0, 100).map(async (id) => {
-				// Getting article
-				const article = await pubmedClient.getArticleById(id)
+			pmcids.slice(0, 100).map(async (id) => {
+				// 3. Getting article
+        const article = await pmcClient.getArticleById(id)
 
-				// Parsing it
-				const articlePart = new PubmedArticleParser().parse(article)
+				// 4. Parsing
+				const text = pmcParser.parse(article)
 
-        // Matching it
-        if (articlePart && query.match(articlePart)) {
-          result.push(article)
-        }
+				if (!text) {
+					reviewArticles.push(article.id)
+					return
+				}
+
+				// 5. Query matching
+				if (query.match(text)) {
+          console.log("lol")
+					searchedArticles.push(article.id)
+				} else {
+					reviewArticles.push(article.id)
+				}
 			})
 		)
 
-		console.log('result:', result)
+    console.log(searchedArticles, reviewArticles)
 	}
 }
 
