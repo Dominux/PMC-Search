@@ -18,6 +18,7 @@
     "@smui/circular-progress": "^6.0.0-beta.13",
     "@smui/fab": "^6.0.0-beta.13",
     "@smui/icon-button": "^6.0.0-beta.13",
+    "@smui/linear-progress": "^6.0.0-beta.13",
     "@smui/paper": "^6.0.0-beta.13",
     "@smui/textfield": "^6.0.0-beta.13",
     "@tsconfig/svelte": "^2.0.0",

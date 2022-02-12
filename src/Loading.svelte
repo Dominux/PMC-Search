@@ -1,17 +1,25 @@
 <div>
-  <CircularProgress
-    class="my-four-colors"
-    style="height: 32px; width: 32px;"
-    indeterminate
-  />
-  {originalArticlesAmount}
-  {reviewArticlesAmount}
+  {#if searchingState === SearchingState.GettingIds}
+    <CircularProgress
+      style="height: 32px; width: 32px;"
+      indeterminate
+    />
+  {:else if searchingState === SearchingState.GettingAndParsingArticles}
+    {originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
+    <LinearProgress progress={progress}/>
+  {/if}
 </div>
  
 <script lang="ts">
-  import CircularProgress from '@smui/circular-progress';
+  import CircularProgress from '@smui/circular-progress'
+  import LinearProgress from '@smui/linear-progress'
 
+  import SearchingState from './web_dbs/searching_state'
+
+  export let buffer
   export let originalArticlesAmount
   export let reviewArticlesAmount
   export let searchingState
+
+  $: progress = (originalArticlesAmount + reviewArticlesAmount) / buffer
 </script>

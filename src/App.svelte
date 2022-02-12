@@ -12,14 +12,20 @@
       </Textfield>
     </Autocomplete>
   </div>
-  <Loading 
-    originalArticlesAmount={originalArticles.length} 
-    reviewArticlesAmount={reviewArticles.length} 
-    searchingState={state}
-  />
+  <br/>
+  <div style="min-width: 60%;">
+    <Loading 
+      buffer={articlesAmount}
+      originalArticlesAmount={originalArticles.length} 
+      reviewArticlesAmount={reviewArticles.length} 
+      searchingState={state}
+    />
+  </div>
 </main>
 
 <script lang="ts">
+  import { onMount } from 'svelte'
+
   import Autocomplete from '@smui-extra/autocomplete'
   import Textfield from '@smui/textfield'
   import { Icon } from '@smui/common'
@@ -29,56 +35,75 @@
   
   import type {ID} from './web_dbs/article'
   import Query from './web_dbs/query/query';
-  import pmcClient from './web_dbs/webdbs_clients/pmc_client';
-  import PMCArticleParser from './web_dbs/parsers/pmc_parser';
+  import pmcClient from './web_dbs/webdbs_clients/pmc_client'
+  import PMCArticleParser from './web_dbs/parsers/pmc_parser'
+  import SearchingState from './web_dbs/searching_state'
 
-  enum SearchingState {
-    GettingIds,
-    GettingAndParsingArticles,
-    Completed,
-  }
+  onMount(() => {
+    setInterval(() => {
+      originalArticles.push(null)
+      reviewArticles.push(null)
+    }, 2000)
+  })
 
   let rawQuery: string = ''
+  let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
   let state: SearchingState
 
 	/** Main function */
 	async function search() {
+    articlesAmount = 0
+
+    // TODO: remove
+    originalArticles = []
+    reviewArticles = []
+
 		state = SearchingState.GettingIds
 
 		// 1. Parsing raw query
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = await pmcClient.getIds(rawQuery)
+		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 315)
+    articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingArticles
 
 		const pmcParser = new PMCArticleParser()
 
-		await Promise.all(
-			pmcids.slice(0, 100).map(async (id) => {
-				// 3. Getting article
-				const article = await pmcClient.getArticleById(id)
+    const chunk_size = 100
+    let pmcids_chunks: Array<Array<ID>> = []
+    for (let i = 0; i < pmcids.length; i += chunk_size) {
+      pmcids_chunks.push(pmcids.slice(i, i + chunk_size))
+    }
 
-				// 4. Parsing
-				const text = pmcParser.parse(article)
+    // Running fetching syncroniously in chunks cause of net::ERR_INSUFFICIENT_RESOURCES
+    for (const chunk of pmcids_chunks) {
+      await Promise.all(
+        chunk.map(async (id) => {
+          // 3. Getting article
+          const article = await pmcClient.getArticleById(id)
 
-				if (!text) {
-					reviewArticles.push(article.id)
-					return
-				}
+          // 4. Parsing
+          const text = pmcParser.parse(article)
 
-				// 5. Query matching
-				if (query.match(text)) {
-					originalArticles.push(article.id)
-				} else {
-					reviewArticles.push(article.id)
-				}
-			})
-		)
+          if (!text) {
+            reviewArticles = [...reviewArticles, article.id]
+            return
+          }
 
+          // 5. Query matching
+          if (query.match(text)) {
+            originalArticles = [...originalArticles, article.id]
+          } else {
+            reviewArticles = [...reviewArticles, article.id]
+          }
+        })
+      )
+    }
+      
 		console.log(originalArticles, reviewArticles)
     state = SearchingState.Completed
 	}
