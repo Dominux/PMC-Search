@@ -24,8 +24,6 @@
 </main>
 
 <script lang="ts">
-  import { onMount } from 'svelte'
-
   import Autocomplete from '@smui-extra/autocomplete'
   import Textfield from '@smui/textfield'
   import { Icon } from '@smui/common'
@@ -38,13 +36,6 @@
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
-
-  onMount(() => {
-    setInterval(() => {
-      originalArticles.push(null)
-      reviewArticles.push(null)
-    }, 2000)
-  })
 
   let rawQuery: string = ''
   let articlesAmount = 0
@@ -66,7 +57,7 @@
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 315)
+		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 15)
     articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingArticles
@@ -104,8 +95,8 @@
       )
     }
       
-		console.log(originalArticles, reviewArticles)
     state = SearchingState.Completed
+		console.log("Results:", {originalArticles, reviewArticles})
 	}
 </script>
 

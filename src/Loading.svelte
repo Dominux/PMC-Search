@@ -6,7 +6,7 @@
     />
   {:else if searchingState === SearchingState.GettingAndParsingArticles}
     {originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
-    <LinearProgress progress={progress}/>
+    <LinearProgress progress={progress} buffer={progress}/>
   {/if}
 </div>
  
