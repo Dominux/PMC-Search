@@ -12,7 +12,7 @@
       </Textfield>
     </Autocomplete>
   </div>
-  <br/>
+
   <div style="min-width: 60%;">
     <Loading 
       buffer={articlesAmount}
@@ -21,6 +21,18 @@
       searchingState={state}
     />
   </div>
+
+  {#if articlesAmount && state === SearchingState.Completed}
+    <div>
+      <List>
+        {#each articlesOverviews as articleOverview}
+          <Item>
+            <ArticleOverviewItem articleOverview={articleOverview}/>
+          </Item>
+        {/each}
+      </List>
+    </div>
+  {/if}
 </main>
 
 <script lang="ts">
@@ -28,9 +40,11 @@
   import Textfield from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
+  import List, {Item} from '@smui/list'
 
   import Loading from './Loading.svelte'
-  
+  import ArticleOverviewItem from './ArticleOverviewItem.svelte';
+    
   import type {ArticleOverview, ID} from './web_dbs/article'
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
@@ -38,10 +52,11 @@
   import SearchingState from './web_dbs/searching_state'
 
   let rawQuery: string = ''
+  let state: SearchingState
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
-  let state: SearchingState
+  let articlesOverviews: Array<ArticleOverview>
 
   const pmcParser = new PMCArticleParser()
 
@@ -49,7 +64,6 @@
 	async function search() {
     articlesAmount = 0
 
-    // TODO: remove
     originalArticles = []
     reviewArticles = []
 
@@ -62,7 +76,7 @@
 		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 100)
     articlesAmount = pmcids.length
 
-		state = SearchingState.GettingAndParsingArticles
+		state = SearchingState.GettingAndParsingAndQueryMatchingArticles
 
     const chunk_size = 100
     let pmcids_chunks: Array<Array<ID>> = []
@@ -95,13 +109,22 @@
       )
     }
       
-    state = SearchingState.Completed
 		console.log("Results:", {originalArticles, reviewArticles})
+
+    state = SearchingState.GettingArticlesOverviews
+
+    articlesOverviews = await getArticlesOverviews(originalArticles)
+
+    state = SearchingState.Completed
 	}
 
   async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
     const article = await pmcClient.getArticleById(articleID)
     return pmcParser.getArticleOverview(article)
+  }
+
+  async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {
+    return await Promise.all(articlesIds.map(async id => await getArticleOverview(id)))
   }
 </script>
 

@@ -1,10 +1,10 @@
 <div>
-  {#if searchingState === SearchingState.GettingIds}
+  {#if [SearchingState.GettingIds, SearchingState.GettingArticlesOverviews].includes(searchingState)}
     <CircularProgress
       style="height: 32px; width: 32px;"
       indeterminate
     />
-  {:else if searchingState === SearchingState.GettingAndParsingArticles}
+  {:else if searchingState === SearchingState.GettingAndParsingAndQueryMatchingArticles}
     {originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
     <LinearProgress progress={progress} buffer={progress}/>
   {/if}

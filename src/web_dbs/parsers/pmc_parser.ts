@@ -27,7 +27,7 @@ export default class PMCArticleParser {
 		}
 	}
 
-  /** Getting article overview */
+	/** Getting article overview */
 	getArticleOverview(article: Article): ArticleOverview {
 		const parser = new DOMParser()
 		const doc = parser.parseFromString(article.content, 'text/html')
@@ -39,7 +39,10 @@ export default class PMCArticleParser {
 		for (const h2 of doc.querySelectorAll('h2')) {
 			if (h2.textContent.toLowerCase().includes('abstract')) {
 				const abstract = h2.parentElement
-				body = abstract.children[2].textContent
+				body = Array.from(abstract.children)
+					.slice(2)
+					.map((element) => element.textContent)
+					.join(' ')
 				break
 			}
 		}
