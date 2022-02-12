@@ -1,3 +1,4 @@
+import { EUTILS_BASEURL } from '../constants'
 import apiClient from '../api_client'
 import type {ID} from '../article'
 
@@ -8,7 +9,7 @@ interface EsearchResponseJson {
 }
 
 export default class BaseWebDBClient {
-	private baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
+	private baseUrl = EUTILS_BASEURL
 
 	protected db: string
 	protected articleBaseUrl: string

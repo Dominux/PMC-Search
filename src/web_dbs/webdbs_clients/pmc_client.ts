@@ -1,9 +1,10 @@
+import { PMC_ARTICLE_BASEURL } from '../constants'
 import BaseWebDBClient from './base_webdb_client'
 import Article, { ID } from '../article'
 
 export class PMCClient extends BaseWebDBClient {
 	protected db = 'pmc'
-	protected articleBaseUrl = 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC'
+	protected articleBaseUrl = PMC_ARTICLE_BASEURL
 
 	async getArticleById(id: ID): Promise<Article> {
 		const url = `${this.articleBaseUrl}${id}`

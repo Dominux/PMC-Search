@@ -29,10 +29,10 @@
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
 
-  import Loading from './Loading.svelte';
+  import Loading from './Loading.svelte'
   
-  import type {ID} from './web_dbs/article'
-  import Query from './web_dbs/query/query';
+  import type {ArticleOverview, ID} from './web_dbs/article'
+  import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
@@ -42,6 +42,8 @@
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
   let state: SearchingState
+
+  const pmcParser = new PMCArticleParser()
 
 	/** Main function */
 	async function search() {
@@ -57,12 +59,10 @@
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 15)
+		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 100)
     articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingArticles
-
-		const pmcParser = new PMCArticleParser()
 
     const chunk_size = 100
     let pmcids_chunks: Array<Array<ID>> = []
@@ -98,6 +98,11 @@
     state = SearchingState.Completed
 		console.log("Results:", {originalArticles, reviewArticles})
 	}
+
+  async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
+    const article = await pmcClient.getArticleById(articleID)
+    return pmcParser.getArticleOverview(article)
+  }
 </script>
 
 <style>
