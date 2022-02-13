@@ -1,5 +1,5 @@
 <div class="card-wrapper">
-  <Card>
+  <Card elevation={4}>
     <Content class="mdc-typography--body2">
       <h2 class="mdc-typography--headline6" style="margin-top: 0; font-size: 1.2rem;">
         <a href={articleOverview.url.toString()}>{articleOverview.title}</a>

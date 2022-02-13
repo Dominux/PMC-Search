@@ -1,5 +1,5 @@
-import { QueryOperator } from './query_element'
-import type { QueryElement } from './query_element'
+import QueryOperator from './query_operator'
+import type QueryElement from './query_element'
 
 const RUNTIME_TYPE_CHECKING = `
   if (typeof articlePart !== 'string') {

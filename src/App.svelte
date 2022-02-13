@@ -44,7 +44,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
 
-  import Textfield from '@smui/textfield'
+  import Textfield, { TextfieldComponentDev } from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
 
@@ -65,7 +65,7 @@
   //  Variables
   ///////////////////////////////////////////////////////////////////
 
-  let searchBarElement: HTMLElement
+  let searchBarElement: TextfieldComponentDev
   let rawQuery: string = ''
   let state: SearchingState
   let articlesAmount = 0
@@ -114,6 +114,7 @@
 
 		// 1. Parsing raw query
 		const query = new Query(rawQuery)
+    console.log(query)
 
 		// 2. Getting ids
 		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 20)

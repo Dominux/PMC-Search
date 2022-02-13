@@ -1,6 +1,7 @@
-import { QueryBuilder } from "./query_element"
-import type { QueryElement } from "./query_element"
+import QueryBuilder from "./query_builder"
+import type QueryElement from "./query_element"
 import QueryMatcher from "./query_matcher"
+import { translateRu2En } from "./ru_query_operator"
 
 /**
  * Performs query matching
@@ -18,6 +19,7 @@ export default class Query {
 	private queryMatcher: QueryMatcher
 
 	constructor(rawQuery: string) {
+    rawQuery = this.translate(rawQuery)
 		this.query = this.compile(rawQuery)
     this.queryMatcher = this.createQueryMatcher(this.query)
 	}
@@ -25,6 +27,10 @@ export default class Query {
 	public match(text: string): boolean {
     return this.queryMatcher.match(text)
 	}
+  
+  private translate(text: string): string {
+    return translateRu2En(text)
+  }
 
 	private compile(rawQuery: string): Array<QueryElement> {
 		const builder = new QueryBuilder(rawQuery)
