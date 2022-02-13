@@ -114,7 +114,6 @@
 
 		// 1. Parsing raw query
 		const query = new Query(rawQuery)
-    console.log(query)
 
 		// 2. Getting ids
 		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 20)
