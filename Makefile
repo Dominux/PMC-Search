@@ -1,7 +1,7 @@
 deploy:
 	-git branch -D gh-pages &&\
 	git checkout -b gh-pages &&\
-	npm i &&\
+	npm ci &&\
 	npm run build &&\
 	mv public/* ./ &&\
 	rm -f .editorconfig .gitattributes .prettierrc \
