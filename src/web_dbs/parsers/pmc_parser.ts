@@ -20,7 +20,7 @@ export default class PMCArticleParser {
 			if (h2.textContent.toLowerCase().includes('results')) {
 				const resultsSec = h2.parentElement
 				return Array.from(resultsSec.children)
-					.slice(2)
+					.slice(1)
 					.map((element) => element.textContent)
 					.join(' ')
 			}
@@ -28,7 +28,7 @@ export default class PMCArticleParser {
 	}
 
 	/** Getting article overview */
-	getArticleOverview(article: Article): ArticleOverview {
+	getArticleOverview(article: Article, bodyLimit?: number): ArticleOverview {
 		const parser = new DOMParser()
 		const doc = parser.parseFromString(article.content, 'text/html')
 
@@ -40,12 +40,17 @@ export default class PMCArticleParser {
 			if (h2.textContent.toLowerCase().includes('abstract')) {
 				const abstract = h2.parentElement
 				body = Array.from(abstract.children)
-					.slice(2)
+					.slice(1)
 					.map((element) => element.textContent)
 					.join(' ')
 				break
 			}
 		}
+
+    // Limiting the body
+    if (bodyLimit) {
+      body = `${body.slice(0, bodyLimit)}...`
+    }
 
 		return new ArticleOverview(article.id, title, body)
 	}

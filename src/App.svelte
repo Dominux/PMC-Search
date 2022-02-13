@@ -1,16 +1,18 @@
 <main>
   <div class="searchbar">
-    <Autocomplete
-      combobox 
-      bind:value={rawQuery}
-      bind:text={rawQuery}
+    <Textfield 
+      class="shaped-outlined" 
+      variant="outlined"
+      label="Поиск" 
+      style="width: 60%;"
+      bind:this={searchBarElement}
+      bind:value={rawQuery} 
+      on:keydown={handleKeyPress}
     >
-      <Textfield class="shaped-outlined" label="Поиск" bind:value={rawQuery} variant="outlined">
-        <Fab slot="trailingIcon" color="primary" on:click={search}> 
-          <Icon class="material-icons">search</Icon>
-        </Fab>
-      </Textfield>
-    </Autocomplete>
+      <Fab slot="trailingIcon" color="primary" on:click={search}> 
+        <Icon class="material-icons">search</Icon>
+      </Fab>
+    </Textfield>
   </div>
 
   <div style="min-width: 60%;">
@@ -23,24 +25,28 @@
   </div>
 
   {#if articlesAmount && state === SearchingState.Completed}
-    <div>
-      <List>
+    <div style="margin: 0 50px">
+      <h3>
+        По вашему запросу найдено 
+        <strong>{originalArticles.length}</strong> оригинальных и
+        <strong>{reviewArticles.length}</strong> обзорных статей
+      </h3>
+      <ul class="results-list">
         {#each articlesOverviews as articleOverview}
-          <Item>
+          <li>
             <ArticleOverviewItem articleOverview={articleOverview}/>
-          </Item>
+          </li>
         {/each}
-      </List>
     </div>
   {/if}
 </main>
 
 <script lang="ts">
-  import Autocomplete from '@smui-extra/autocomplete'
+  import { onMount } from 'svelte'
+
   import Textfield from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
-  import List, {Item} from '@smui/list'
 
   import Loading from './Loading.svelte'
   import ArticleOverviewItem from './ArticleOverviewItem.svelte';
@@ -50,7 +56,16 @@
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
+  import { 
+    ARTICLE_OVERVIEW_BODY_LIMIT, 
+    SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT 
+  } from './web_dbs/constants'
 
+  ///////////////////////////////////////////////////////////////////
+  //  Variables
+  ///////////////////////////////////////////////////////////////////
+
+  let searchBarElement: HTMLElement
   let rawQuery: string = ''
   let state: SearchingState
   let articlesAmount = 0
@@ -59,6 +74,34 @@
   let articlesOverviews: Array<ArticleOverview>
 
   const pmcParser = new PMCArticleParser()
+
+  ///////////////////////////////////////////////////////////////////
+  //  Lifecycle hooks
+  ///////////////////////////////////////////////////////////////////
+  
+  onMount(() => {
+    // running focusing on search bar
+    setTimeout(() => {
+      searchBarElement.focus()
+    }, SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT)
+  })
+
+  ///////////////////////////////////////////////////////////////////
+  //  Functions
+  ///////////////////////////////////////////////////////////////////
+
+  async function handleKeyPress(event: CustomEvent | KeyboardEvent) {
+    // Handling keypress
+    event = event as KeyboardEvent
+    if (event.key === 'Enter') {
+      // Unfocusing element
+      const target = event.target as HTMLElement 
+      target.blur()
+
+      // Running search
+      await search()
+    }
+  }
 
 	/** Main function */
 	async function search() {
@@ -73,7 +116,7 @@
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 100)
+		let pmcids = (await pmcClient.getIds(rawQuery)).slice(0, 20)
     articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingAndQueryMatchingArticles
@@ -120,7 +163,7 @@
 
   async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
     const article = await pmcClient.getArticleById(articleID)
-    return pmcParser.getArticleOverview(article)
+    return pmcParser.getArticleOverview(article, ARTICLE_OVERVIEW_BODY_LIMIT)
   }
 
   async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {
@@ -129,15 +172,15 @@
 </script>
 
 <style>
-main {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
 .searchbar {
+  margin-top: 42px;
   min-width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.results-list {
+  list-style-type: none;
+  padding: 0;
 }
 </style>
