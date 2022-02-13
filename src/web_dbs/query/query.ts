@@ -15,12 +15,13 @@ import { translateRu2En } from "./ru_query_operator"
  *
  * */
 export default class Query {
+  readonly rawQuery: string
 	private query: Array<QueryElement>
 	private queryMatcher: QueryMatcher
 
 	constructor(rawQuery: string) {
-    rawQuery = this.translate(rawQuery)
-		this.query = this.compile(rawQuery)
+    this.rawQuery = this.translate(rawQuery)
+		this.query = this.compile(this.rawQuery)
     this.queryMatcher = this.createQueryMatcher(this.query)
 	}
 
