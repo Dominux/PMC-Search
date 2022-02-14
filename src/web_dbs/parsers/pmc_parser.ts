@@ -47,11 +47,13 @@ export default class PMCArticleParser {
 			}
 		}
 
-    // Limiting the body
-    if (bodyLimit) {
-      body = `${body.slice(0, bodyLimit)}...`
-    }
+    // Getting authors and publisher info
 
-		return new ArticleOverview(article.id, title, body)
+
+		return new ArticleOverview(
+      article.id, 
+      title, 
+      body,
+    )
 	}
 }

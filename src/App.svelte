@@ -56,10 +56,7 @@
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
-  import { 
-    ARTICLE_OVERVIEW_BODY_LIMIT, 
-    SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT 
-  } from './web_dbs/constants'
+  import { SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT } from './web_dbs/constants'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables
@@ -163,7 +160,7 @@
 
   async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
     const article = await pmcClient.getArticleById(articleID)
-    return pmcParser.getArticleOverview(article, ARTICLE_OVERVIEW_BODY_LIMIT)
+    return pmcParser.getArticleOverview(article)
   }
 
   async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {

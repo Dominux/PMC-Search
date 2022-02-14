@@ -5,7 +5,8 @@
         <a href={articleOverview.url.toString()}>{articleOverview.title}</a>
       </h2>
 
-      {articleOverview.body}
+      {articleOverviewBody}
+      <!-- TODO: Add button to read more -->
 
       <h3
         class="mdc-typography--subtitle2"
@@ -21,8 +22,13 @@
   import Card, {Content} from '@smui/card'
 
   import type { ArticleOverview } from './web_dbs/article' 
+  import { ARTICLE_OVERVIEW_BODY_LIMIT } from "./web_dbs/constants";
 
   export let articleOverview: ArticleOverview
+
+  let toShowFullBody: false
+
+  $: articleOverviewBody = toShowFullBody ? articleOverview.body : articleOverview.body.slice(0, ARTICLE_OVERVIEW_BODY_LIMIT)
 </script>
 
 <style>

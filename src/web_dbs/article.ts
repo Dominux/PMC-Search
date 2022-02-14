@@ -15,6 +15,7 @@ export class ArticleOverview {
 		readonly id: ID,
 		readonly title: string,
 		readonly body: string,
+    readonly authorsAndPublisher?: string,
 	) {}
 
 	public get url(): URL {
