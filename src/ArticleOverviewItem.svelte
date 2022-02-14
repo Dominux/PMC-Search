@@ -5,8 +5,10 @@
         <a href={articleOverview.url.toString()}>{articleOverview.title}</a>
       </h2>
 
-      {articleOverviewBody}
-      <!-- TODO: Add button to read more -->
+      {articleOverviewBody} 
+      <span class="readmore-toggle" on:click={() => toShowFullBody = !toShowFullBody}>
+        {toShowFullBody ? "  Свернуть" : "  Читать ещё"}
+      </span>
 
       <h3
         class="mdc-typography--subtitle2"
@@ -26,14 +28,24 @@
 
   export let articleOverview: ArticleOverview
 
-  let toShowFullBody: false
+  let toShowFullBody = false
 
-  $: articleOverviewBody = toShowFullBody ? articleOverview.body : articleOverview.body.slice(0, ARTICLE_OVERVIEW_BODY_LIMIT)
+  $: articleOverviewBody = toShowFullBody 
+    ? articleOverview.body
+    : `${articleOverview.body.slice(0, ARTICLE_OVERVIEW_BODY_LIMIT)}...`
 </script>
 
 <style>
   .card-wrapper {
     margin: 1rem 10%;
     width: 500px;
+  }
+
+  .readmore-toggle {
+    color: #575757;
+  }
+  .readmore-toggle:hover {
+    color: #979797;
+    cursor: pointer;
   }
 </style>
