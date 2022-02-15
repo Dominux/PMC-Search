@@ -1,28 +1,7 @@
 <main>
   <div class="searchbar">
-    <Autocomplete
-      combobox 
-      options={autocompleteOptions}
-      style="width: 60%;"
-      bind:value={autocompleteValue}
-      bind:text={autocompleteValue}
-      on:SMUIAutocomplete:selected={onSelectAutocompleteOption}
-    >
-      <Textfield 
-        class="shaped-outlined" 
-        variant="outlined"
-        label="Поиск" 
-        style="width: 100%;"
-        bind:this={searchBarElement}
-        bind:value={rawQuery} 
-      >
-        <Fab slot="trailingIcon" color="primary" on:click={search}> 
-          <Icon class="material-icons">search</Icon>
-        </Fab>
-      </Textfield>
-    </Autocomplete>
+    <SearchBar on:search={search}/>
   </div>
-  {autocompleteValue}
 
   <div style="min-width: 60%;">
     <Loading 
@@ -51,24 +30,15 @@
 </main>
 
 <script lang="ts">
-  import { onMount } from 'svelte'
-
-  import Autocomplete from '@smui-extra/autocomplete'
-  import Textfield, { TextfieldComponentDev } from '@smui/textfield'
-  import { Icon } from '@smui/common'
-  import Fab from '@smui/fab'
-
   import Loading from './Loading.svelte'
   import ArticleOverviewItem from './ArticleOverviewItem.svelte';
+  import SearchBar from "./Searchbar.svelte";
     
   import type {ArticleOverview, ID} from './web_dbs/article'
   import Query from './web_dbs/query/query'
-  import QueryBuilder from './web_dbs/query/query_builder'
-  import RuQueryOperator from './web_dbs/query/ru_query_operator'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
-  import { SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT } from './web_dbs/constants'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables
@@ -76,10 +46,6 @@
 
   const pmcParser = new PMCArticleParser()
 
-  let searchBarElement: TextfieldComponentDev
-  let rawQuery = ''
-  let autocompleteValue = ''
-  let autocompleteOptions = []
   let state: SearchingState
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
@@ -87,57 +53,11 @@
   let articlesOverviews: Array<ArticleOverview>
 
   ///////////////////////////////////////////////////////////////////
-  //  Reactive declarations
-  ///////////////////////////////////////////////////////////////////
-
-  // $: autocompleteOptions = rawQuery.length % 2 == 0 ? ['[', ']'] : ['lol', 'kek']
-  $: {
-    // Checking user raw query while he's typing
-    const query = QueryBuilder.parseToTokens(rawQuery)
-    const lastWord = query[query.length - 1]
-
-    if (!lastWord || [...Object.values<string>(RuQueryOperator), '['].includes(lastWord)) {
-      autocompleteOptions = ['[', ']']
-    } else {
-      autocompleteOptions = [...Object.values(RuQueryOperator), '[', ']']
-    }
-  }
-
-  ///////////////////////////////////////////////////////////////////
-  //  Lifecycle hooks
-  ///////////////////////////////////////////////////////////////////
-  
-  onMount(() => {
-    // running focusing on search bar
-    setTimeout(() => {
-      searchBarElement.focus()
-    }, SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT)
-  })
-
-  ///////////////////////////////////////////////////////////////////
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
-  function onSelectAutocompleteOption() {
-    rawQuery = rawQuery ? `${rawQuery} ${autocompleteValue}` : autocompleteValue 
-    autocompleteValue = ''
-  }
-
-  async function handleKeyPress(event: CustomEvent | KeyboardEvent) {
-    // Handling keypress
-    event = event as KeyboardEvent
-    if (event.key === 'Enter') {
-      // Unfocusing element
-      const target = event.target as HTMLElement 
-      target.blur()
-
-      // Running search
-      await search()
-    }
-  }
-
 	/** Main function */
-	async function search() {
+	async function search(rawQuery) {
     articlesAmount = 0
 
     originalArticles = []
@@ -207,7 +127,7 @@
 <style>
 .searchbar {
   margin-top: 42px;
-  min-width: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
