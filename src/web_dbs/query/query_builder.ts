@@ -4,7 +4,7 @@ export default class QueryBuilder {
 	constructor(public rawQuery: string) {}
 
 	compile(): Array<QueryElement> {
-		const tokens = this.parseToTokens(this.rawQuery)
+		const tokens = QueryBuilder.parseToTokens(this.rawQuery)
 		return this.compileTokens(tokens)
 	}
 
@@ -12,7 +12,7 @@ export default class QueryBuilder {
 	 * rawQuery looks like:
 	 *  human AND protein OR apple OR [human AND [apple OR rat]] AND sugar AND [breast cancer AND lol]
 	 */
-	private parseToTokens(rawQuery: string): Array<string> {
+	public static parseToTokens(rawQuery: string): Array<string> {
 		// Putting space after every '[' and before every ']' symbol
 		rawQuery = rawQuery.replaceAll('[', '[ ')
 		rawQuery = rawQuery.replaceAll(']', ' ]')

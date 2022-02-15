@@ -1,19 +1,28 @@
 <main>
   <div class="searchbar">
-    <Textfield 
-      class="shaped-outlined" 
-      variant="outlined"
-      label="Поиск" 
+    <Autocomplete
+      combobox 
+      options={autocompleteOptions}
       style="width: 60%;"
-      bind:this={searchBarElement}
-      bind:value={rawQuery} 
-      on:keydown={handleKeyPress}
+      bind:value={autocompleteValue}
+      bind:text={autocompleteValue}
+      on:SMUIAutocomplete:selected={onSelectAutocompleteOption}
     >
-      <Fab slot="trailingIcon" color="primary" on:click={search}> 
-        <Icon class="material-icons">search</Icon>
-      </Fab>
-    </Textfield>
+      <Textfield 
+        class="shaped-outlined" 
+        variant="outlined"
+        label="Поиск" 
+        style="width: 100%;"
+        bind:this={searchBarElement}
+        bind:value={rawQuery} 
+      >
+        <Fab slot="trailingIcon" color="primary" on:click={search}> 
+          <Icon class="material-icons">search</Icon>
+        </Fab>
+      </Textfield>
+    </Autocomplete>
   </div>
+  {autocompleteValue}
 
   <div style="min-width: 60%;">
     <Loading 
@@ -44,6 +53,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
 
+  import Autocomplete from '@smui-extra/autocomplete'
   import Textfield, { TextfieldComponentDev } from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
@@ -53,6 +63,8 @@
     
   import type {ArticleOverview, ID} from './web_dbs/article'
   import Query from './web_dbs/query/query'
+  import QueryBuilder from './web_dbs/query/query_builder'
+  import RuQueryOperator from './web_dbs/query/ru_query_operator'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
@@ -62,15 +74,34 @@
   //  Variables
   ///////////////////////////////////////////////////////////////////
 
+  const pmcParser = new PMCArticleParser()
+
   let searchBarElement: TextfieldComponentDev
-  let rawQuery: string = ''
+  let rawQuery = ''
+  let autocompleteValue = ''
+  let autocompleteOptions = []
   let state: SearchingState
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
   let articlesOverviews: Array<ArticleOverview>
 
-  const pmcParser = new PMCArticleParser()
+  ///////////////////////////////////////////////////////////////////
+  //  Reactive declarations
+  ///////////////////////////////////////////////////////////////////
+
+  // $: autocompleteOptions = rawQuery.length % 2 == 0 ? ['[', ']'] : ['lol', 'kek']
+  $: {
+    // Checking user raw query while he's typing
+    const query = QueryBuilder.parseToTokens(rawQuery)
+    const lastWord = query[query.length - 1]
+
+    if (!lastWord || [...Object.values<string>(RuQueryOperator), '['].includes(lastWord)) {
+      autocompleteOptions = ['[', ']']
+    } else {
+      autocompleteOptions = [...Object.values(RuQueryOperator), '[', ']']
+    }
+  }
 
   ///////////////////////////////////////////////////////////////////
   //  Lifecycle hooks
@@ -86,6 +117,11 @@
   ///////////////////////////////////////////////////////////////////
   //  Functions
   ///////////////////////////////////////////////////////////////////
+
+  function onSelectAutocompleteOption() {
+    rawQuery = rawQuery ? `${rawQuery} ${autocompleteValue}` : autocompleteValue 
+    autocompleteValue = ''
+  }
 
   async function handleKeyPress(event: CustomEvent | KeyboardEvent) {
     // Handling keypress
