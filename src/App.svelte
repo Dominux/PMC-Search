@@ -1,6 +1,6 @@
 <main>
   <div class="searchbar">
-    <SearchBar on:search={search}/>
+    <SearchBar on:search={event => search(event.detail.rawQuery)}/>
   </div>
 
   <div style="min-width: 60%;">

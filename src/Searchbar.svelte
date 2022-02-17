@@ -6,8 +6,6 @@
     style="width: 100%;"
     bind:this={textField}
     bind:value={rawQuery} 
-    on:focus={() => menu.setOpen(true)}
-    on:blur={() => menu.setOpen(false)}
   >
     <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
       <Icon class="material-icons">search</Icon>
@@ -15,7 +13,7 @@
   </Textfield>
 
   <!-- Options -->
-  <Menu bind:this={menu} style="min-width: 100%; position: relative;">
+  <!-- <Menu bind:this={menu} style="min-width: 100%; position: relative;">
     <List>
       {#each options as option}
         <Item on:SMUI:action={() => onSelectOption(option)}>
@@ -23,7 +21,7 @@
         </Item>
       {/each}
     </List>
-  </Menu>
+  </Menu> -->
 </div>
 
 <script lang="ts">
@@ -32,8 +30,8 @@
   import Textfield, { TextfieldComponentDev } from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
-  import Menu, { MenuComponentDev } from '@smui/menu';
-  import List, { Item, Text } from '@smui/list';
+  // import Menu, { MenuComponentDev } from '@smui/menu';
+  // import List, { Item, Text } from '@smui/list';
   
   import QueryBuilder from './web_dbs/query/query_builder'
   import RuQueryOperator from './web_dbs/query/ru_query_operator'
@@ -45,7 +43,7 @@
 
   const dispatch = createEventDispatcher()
 
-  let menu: MenuComponentDev;
+  // let menu: MenuComponentDev;
   let textField: TextfieldComponentDev
   let rawQuery = ''
   let options = []

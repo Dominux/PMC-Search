@@ -16,23 +16,47 @@
       >
         Здесь должны быть авторы
       </h3>
+
+      <Fab on:click={() => toggleTranslation()} mini touch>
+        <Icon class="material-icons">translate</Icon>
+      </Fab>
     </Content>
   </Card>
 </div>
 
 <script lang="ts">
   import Card, {Content} from '@smui/card'
+  import { Icon } from '@smui/common'
+  import Fab from '@smui/fab'
 
   import type { ArticleOverview } from './web_dbs/article' 
   import { ARTICLE_OVERVIEW_BODY_LIMIT } from "./web_dbs/constants";
+  import translationApiClient from './web_dbs/transtation_api_client';
 
   export let articleOverview: ArticleOverview
 
   let toShowFullBody = false
+  let translatedArticleOverview: string
+  let toShowTranslation = false
 
+  $: showingText = toShowTranslation && translatedArticleOverview ? translatedArticleOverview : articleOverview.body
   $: articleOverviewBody = toShowFullBody 
-    ? articleOverview.body
-    : `${articleOverview.body.slice(0, ARTICLE_OVERVIEW_BODY_LIMIT)}...`
+    ? showingText
+    : `${showingText.slice(0, ARTICLE_OVERVIEW_BODY_LIMIT)}...`
+
+  async function toggleTranslation() {
+    console.log(toShowTranslation)
+    if (toShowTranslation) {
+      toShowTranslation = false
+      return
+    }
+
+    if (!translatedArticleOverview) {
+      translatedArticleOverview = await translationApiClient.translate(articleOverview.body)
+    }
+
+    toShowTranslation = true
+  }
 </script>
 
 <style>
