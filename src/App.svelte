@@ -1,18 +1,6 @@
 <main>
   <div class="searchbar">
-    <Textfield 
-      class="shaped-outlined" 
-      variant="outlined"
-      label="Поиск" 
-      style="width: 60%;"
-      bind:this={searchBarElement}
-      bind:value={rawQuery} 
-      on:keydown={handleKeyPress}
-    >
-      <Fab slot="trailingIcon" color="primary" on:click={search}> 
-        <Icon class="material-icons">search</Icon>
-      </Fab>
-    </Textfield>
+    <SearchBar on:search={event => search(event.detail.rawQuery)}/>
   </div>
 
   <div style="min-width: 60%;">
@@ -42,66 +30,34 @@
 </main>
 
 <script lang="ts">
-  import { onMount } from 'svelte'
-
-  import Textfield, { TextfieldComponentDev } from '@smui/textfield'
-  import { Icon } from '@smui/common'
-  import Fab from '@smui/fab'
-
   import Loading from './Loading.svelte'
   import ArticleOverviewItem from './ArticleOverviewItem.svelte';
+  import SearchBar from "./Searchbar.svelte";
     
   import type {ArticleOverview, ID} from './web_dbs/article'
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/searching_state'
-  import { SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT } from './web_dbs/constants'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables
   ///////////////////////////////////////////////////////////////////
 
-  let searchBarElement: TextfieldComponentDev
-  let rawQuery: string = ''
+  const pmcParser = new PMCArticleParser()
+
   let state: SearchingState
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
   let articlesOverviews: Array<ArticleOverview>
 
-  const pmcParser = new PMCArticleParser()
-
-  ///////////////////////////////////////////////////////////////////
-  //  Lifecycle hooks
-  ///////////////////////////////////////////////////////////////////
-  
-  onMount(() => {
-    // running focusing on search bar
-    setTimeout(() => {
-      searchBarElement.focus()
-    }, SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT)
-  })
-
   ///////////////////////////////////////////////////////////////////
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
-  async function handleKeyPress(event: CustomEvent | KeyboardEvent) {
-    // Handling keypress
-    event = event as KeyboardEvent
-    if (event.key === 'Enter') {
-      // Unfocusing element
-      const target = event.target as HTMLElement 
-      target.blur()
-
-      // Running search
-      await search()
-    }
-  }
-
 	/** Main function */
-	async function search() {
+	async function search(rawQuery) {
     articlesAmount = 0
 
     originalArticles = []
@@ -171,7 +127,7 @@
 <style>
 .searchbar {
   margin-top: 42px;
-  min-width: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
 }

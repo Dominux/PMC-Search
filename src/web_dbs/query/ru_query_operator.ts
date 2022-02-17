@@ -12,9 +12,8 @@ export default RuQueryOperator
  * Perform operators translation from russian to english
  */
 export function translateRu2En(rawQuery: string): string {
-  ['Or', 'And', 'Not'].forEach(operator => {
-    const ruOperator = RuQueryOperator[operator]
-    const re = new RegExp(`\\B${ruOperator}\\B`, 'gmi')
+  Object.keys(RuQueryOperator).forEach(operator => {
+    const re = new RegExp(`\\B${RuQueryOperator[operator]}\\B`, 'gmi')
     rawQuery = rawQuery.replaceAll(re, QueryOperator[operator])
   })
 
