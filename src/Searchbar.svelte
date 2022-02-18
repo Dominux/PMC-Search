@@ -15,6 +15,8 @@
         style="width: 100%;"
         bind:this={textField}
         bind:value={rawQuery}
+        on:keyup={updateCursorPosition}
+        on:click={updateCursorPosition}
       >
         <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
           <Icon class="material-icons">search</Icon>
@@ -44,6 +46,7 @@
 
   let textField: TextfieldComponentDev
   let autocompleteValue = ''
+  let cursorPosition: number
   let rawQuery = ''
   let oldRawQuery = ''
   let options = []
@@ -72,9 +75,8 @@
 
     // reloading components only when options have changed
     if (JSON.stringify(options) !== JSON.stringify(oldOptions)) {
-      console.log(options, oldOptions)
       oldOptions = options
-      reloadComponent().then(() => setCursorPosition())
+      reloadComponent().then()
     }
 
   }
@@ -123,14 +125,18 @@
       .selectionStart
   } 
 
-  function setCursorPosition() {
+  function setCursorPosition(position: number) {
     textField
       .$$
       .root
       .querySelector("#searchbar")
       .querySelector("input")
-      .setSelectionRange(1, 1)
+      .setSelectionRange(position, position)
   } 
+
+  function updateCursorPosition() {
+    cursorPosition = getCursorPosition()
+  }
 
   /**
   *  reloading whole component cause Autocomplete component
