@@ -1,37 +1,36 @@
-<div style="width: 60%;" on:keydown={handleKeyPress}>
-  <Textfield 
-    class="shaped-outlined" 
-    variant="outlined"
-    label="Поиск" 
-    style="width: 100%;"
-    bind:this={textField}
-    bind:value={rawQuery} 
-  >
-    <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
-      <Icon class="material-icons">search</Icon>
-    </Fab>
-  </Textfield>
-
-  <!-- Options -->
-  <!-- <Menu bind:this={menu} style="min-width: 100%; position: relative;">
-    <List>
-      {#each options as option}
-        <Item on:SMUI:action={() => onSelectOption(option)}>
-          <Text>{option}</Text>
-        </Item>
-      {/each}
-    </List>
-  </Menu> -->
+<div id="searchbar">
+  {#key hotLoader}
+    <Autocomplete
+      combobox 
+      options={options}
+      style="width: 100%;"
+      bind:value={autocompleteValue}
+      bind:text={autocompleteValue}
+      on:SMUIAutocomplete:selected={onSelectAutocompleteOption}
+    >
+      <Textfield 
+        class="shaped-outlined" 
+        variant="outlined"
+        label="Поиск" 
+        style="width: 100%;"
+        bind:this={textField}
+        bind:value={rawQuery}
+      >
+        <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
+          <Icon class="material-icons">search</Icon>
+        </Fab>
+      </Textfield>
+    </Autocomplete>
+  {/key}
 </div>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onMount, tick } from 'svelte'
 
   import Textfield, { TextfieldComponentDev } from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
-  // import Menu, { MenuComponentDev } from '@smui/menu';
-  // import List, { Item, Text } from '@smui/list';
+  import Autocomplete from '@smui-extra/autocomplete'
   
   import QueryBuilder from './web_dbs/query/query_builder'
   import RuQueryOperator from './web_dbs/query/ru_query_operator'
@@ -43,16 +42,22 @@
 
   const dispatch = createEventDispatcher()
 
-  // let menu: MenuComponentDev;
   let textField: TextfieldComponentDev
+  let autocompleteValue = ''
   let rawQuery = ''
+  let oldRawQuery = ''
   let options = []
+  let oldOptions = []
+  let hotLoader = {}
 
   ///////////////////////////////////////////////////////////////////
   //  Reactive declarations
   ///////////////////////////////////////////////////////////////////
 
-  $: {
+  // Watching raw query changing
+  $: if (rawQuery !== oldRawQuery) {
+    oldRawQuery = rawQuery
+
     // Checking user raw query while he's typing
     const query = QueryBuilder.parseToTokens(rawQuery)
     const lastWord = query[query.length - 1]
@@ -62,6 +67,16 @@
     } else {
       options = [...Object.values(RuQueryOperator), '[', ']']
     }
+
+    // console.log(getCursorPosition())
+
+    // reloading components only when options have changed
+    if (JSON.stringify(options) !== JSON.stringify(oldOptions)) {
+      console.log(options, oldOptions)
+      oldOptions = options
+      reloadComponent().then(() => setCursorPosition())
+    }
+
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -79,7 +94,8 @@
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
-  function handleKeyPress(event: CustomEvent | KeyboardEvent) {
+  function handleEnter(event: CustomEvent | KeyboardEvent) {
+    console.log("lol")
     // Handling keypress
     event = event as KeyboardEvent
     if (event.key === 'Enter') {
@@ -91,10 +107,38 @@
       runSearch()
     }
   }
+  
+  function onSelectAutocompleteOption() {
+    // Consuming autocomplete value
+    rawQuery = `${rawQuery} ${autocompleteValue} `
+    autocompleteValue = ''
+  }
 
-  function onSelectOption(option: string) {
-    console.log(option)
-    rawQuery = `${rawQuery} ${option} `
+  function getCursorPosition(): number {
+    return textField
+      .$$
+      .root
+      .querySelector("#searchbar")
+      .querySelector("input")
+      .selectionStart
+  } 
+
+  function setCursorPosition() {
+    textField
+      .$$
+      .root
+      .querySelector("#searchbar")
+      .querySelector("input")
+      .setSelectionRange(1, 1)
+  } 
+
+  /**
+  *  reloading whole component cause Autocomplete component
+  *  does not caches options prop
+  */
+  async function reloadComponent() {
+    hotLoader = {}
+    await tick()
     textField.focus()
   }
 

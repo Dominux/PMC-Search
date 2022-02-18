@@ -12,7 +12,7 @@
     />
   </div>
 
-  {#if articlesAmount && state === SearchingState.Completed}
+  {#if state === SearchingState.Completed}
     <div style="margin: 0 50px">
       <h3>
         По вашему запросу найдено 
@@ -126,10 +126,10 @@
 
 <style>
 .searchbar {
-  margin-top: 42px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  width: 60%;
+  margin: 3rem auto 0;
+  /* display: flex;
+  justify-self: center; */
 }
 
 .results-list {

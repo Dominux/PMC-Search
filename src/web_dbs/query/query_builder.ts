@@ -1,4 +1,4 @@
-import type QueryElement from "./query_element"
+import type QueryElement from './query_element'
 
 export default class QueryBuilder {
 	constructor(public rawQuery: string) {}
@@ -17,7 +17,7 @@ export default class QueryBuilder {
 		rawQuery = rawQuery.replaceAll('[', '[ ')
 		rawQuery = rawQuery.replaceAll(']', ' ]')
 
-		return rawQuery.split(' ')
+		return rawQuery.trim().split(' ')
 	}
 
 	private compileTokens(tokens: Array<string>): Array<QueryElement> {
@@ -27,29 +27,25 @@ export default class QueryBuilder {
 
 		tokens.forEach((token) => {
 			if (token === '[') {
-
 				openedBracketsAmount++
 
 				if (openedBracketsAmount > 1) {
-          subquery.push(token)
+					subquery.push(token)
 				}
-
 			} else if (token === ']') {
+				openedBracketsAmount--
 
-        openedBracketsAmount--
-
-        if (openedBracketsAmount) {
-          subquery.push(token)
-        } else {
-          query.push(this.compileTokens(subquery))
-          subquery = []
-        }
-
-      } else if (openedBracketsAmount) {
-        subquery.push(token)
-      } else {
-        query.push(token)
-      }
+				if (openedBracketsAmount) {
+					subquery.push(token)
+				} else {
+					query.push(this.compileTokens(subquery))
+					subquery = []
+				}
+			} else if (openedBracketsAmount) {
+				subquery.push(token)
+			} else {
+				query.push(token)
+			}
 		})
 
 		return query
