@@ -1,40 +1,40 @@
-<div style="width: 60%;" on:keydown={handleKeyPress}>
-  <Textfield 
-    class="shaped-outlined" 
-    variant="outlined"
-    label="Поиск" 
-    style="width: 100%;"
-    bind:this={textField}
-    bind:value={rawQuery} 
-  >
-    <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
-      <Icon class="material-icons">search</Icon>
-    </Fab>
-  </Textfield>
-
-  <!-- Options -->
-  <!-- <Menu bind:this={menu} style="min-width: 100%; position: relative;">
-    <List>
-      {#each options as option}
-        <Item on:SMUI:action={() => onSelectOption(option)}>
-          <Text>{option}</Text>
-        </Item>
-      {/each}
-    </List>
-  </Menu> -->
+<div id="searchbar">
+  {#key hotLoader}
+    <Autocomplete
+      combobox 
+      options={suggestions}
+      style="width: 100%;"
+      bind:value={autocompleteValue}
+      bind:text={autocompleteValue}
+      on:SMUIAutocomplete:selected={onSelectSuggestion}
+    >
+      <Textfield 
+        class="shaped-outlined" 
+        variant="outlined"
+        label="Поиск" 
+        style="width: 100%;"
+        bind:this={textField}
+        bind:value={rawQuery}
+        on:keyup={updateCursorPosition}
+        on:click={updateCursorPosition}
+      >
+        <Fab slot="trailingIcon" color="primary" on:click={runSearch}> 
+          <Icon class="material-icons">search</Icon>
+        </Fab>
+      </Textfield>
+    </Autocomplete>
+  {/key}
 </div>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onMount, tick } from 'svelte'
 
   import Textfield, { TextfieldComponentDev } from '@smui/textfield'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
-  // import Menu, { MenuComponentDev } from '@smui/menu';
-  // import List, { Item, Text } from '@smui/list';
+  import Autocomplete from '@smui-extra/autocomplete'
   
-  import QueryBuilder from './web_dbs/query/query_builder'
-  import RuQueryOperator from './web_dbs/query/ru_query_operator'
+  import createSuggestions from './web_dbs/suggestions'
   import { SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT } from './web_dbs/constants'
  
   ///////////////////////////////////////////////////////////////////
@@ -43,26 +43,13 @@
 
   const dispatch = createEventDispatcher()
 
-  // let menu: MenuComponentDev;
   let textField: TextfieldComponentDev
+  let autocompleteValue = ''
+  let cursorPosition: number
   let rawQuery = ''
-  let options = []
-
-  ///////////////////////////////////////////////////////////////////
-  //  Reactive declarations
-  ///////////////////////////////////////////////////////////////////
-
-  $: {
-    // Checking user raw query while he's typing
-    const query = QueryBuilder.parseToTokens(rawQuery)
-    const lastWord = query[query.length - 1]
-
-    if (!lastWord || [...Object.values<string>(RuQueryOperator), '['].includes(lastWord)) {
-      options = ['[', ']']
-    } else {
-      options = [...Object.values(RuQueryOperator), '[', ']']
-    }
-  }
+  let suggestions = []
+  let oldsuggestions = []
+  let hotLoader = {}
 
   ///////////////////////////////////////////////////////////////////
   //  Lifecycle hooks
@@ -79,7 +66,9 @@
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
-  function handleKeyPress(event: CustomEvent | KeyboardEvent) {
+  // TODO: use it
+  function handleEnter(event: CustomEvent | KeyboardEvent) {
+    console.log("lol")
     // Handling keypress
     event = event as KeyboardEvent
     if (event.key === 'Enter') {
@@ -91,10 +80,62 @@
       runSearch()
     }
   }
+  
+  function onSelectSuggestion() {
+    // Inserting suggestion after cursor position
+		const leftPart = rawQuery.substring(0, cursorPosition).trim()
+		const rigthPart = rawQuery.substring(cursorPosition).trim()
 
-  function onSelectOption(option: string) {
-    console.log(option)
-    rawQuery = `${rawQuery} ${option} `
+    rawQuery = `${leftPart} ${autocompleteValue} ${rigthPart}`
+
+    // Putting cursor after suggestion
+    setCursorPosition(leftPart.length + 1 + autocompleteValue.length)
+
+    // Consuming autocomplete value
+    autocompleteValue = ''
+  }
+
+  function getCursorPosition(): number {
+    return textField
+      .$$
+      .root
+      .querySelector("#searchbar")
+      .querySelector("input")
+      .selectionStart
+  } 
+
+  function setCursorPosition(position: number) {
+    textField
+      .$$
+      .root
+      .querySelector("#searchbar")
+      .querySelector("input")
+      .setSelectionRange(position, position)
+
+    updateCursorPosition()
+  } 
+
+  function updateCursorPosition() {
+    cursorPosition = getCursorPosition()
+    onUpdateCursorPosition()
+  }
+
+  function onUpdateCursorPosition() {
+    suggestions = createSuggestions(rawQuery, cursorPosition)
+
+    // Reloading components only when suggestions have changed
+    if (JSON.stringify(suggestions) !== JSON.stringify(oldsuggestions)) {
+      oldsuggestions = suggestions
+      reloadComponent().then(() => setCursorPosition(cursorPosition))
+    }
+  }
+
+  /**
+  *  reloading whole component cause Autocomplete component caches suggestions prop
+  */
+  async function reloadComponent() {
+    hotLoader = {}
+    await tick()
     textField.focus()
   }
 
