@@ -2,11 +2,11 @@
   {#key hotLoader}
     <Autocomplete
       combobox 
-      options={options}
+      options={suggestions}
       style="width: 100%;"
       bind:value={autocompleteValue}
       bind:text={autocompleteValue}
-      on:SMUIAutocomplete:selected={onSelectAutocompleteOption}
+      on:SMUIAutocomplete:selected={onSelectSuggestion}
     >
       <Textfield 
         class="shaped-outlined" 
@@ -34,8 +34,7 @@
   import Fab from '@smui/fab'
   import Autocomplete from '@smui-extra/autocomplete'
   
-  import QueryBuilder from './web_dbs/query/query_builder'
-  import RuQueryOperator from './web_dbs/query/ru_query_operator'
+  import createSuggestions from './web_dbs/suggestions'
   import { SEARCHBAR_ONMOUNT_FOCUSING_TIMEOUT } from './web_dbs/constants'
  
   ///////////////////////////////////////////////////////////////////
@@ -48,38 +47,9 @@
   let autocompleteValue = ''
   let cursorPosition: number
   let rawQuery = ''
-  let oldRawQuery = ''
-  let options = []
-  let oldOptions = []
+  let suggestions = []
+  let oldsuggestions = []
   let hotLoader = {}
-
-  ///////////////////////////////////////////////////////////////////
-  //  Reactive declarations
-  ///////////////////////////////////////////////////////////////////
-
-  // Watching raw query changing
-  $: if (rawQuery !== oldRawQuery) {
-    oldRawQuery = rawQuery
-
-    // Checking user raw query while he's typing
-    const query = QueryBuilder.parseToTokens(rawQuery)
-    const lastWord = query[query.length - 1]
-
-    if (!lastWord || [...Object.values<string>(RuQueryOperator), '['].includes(lastWord)) {
-      options = ['[', ']']
-    } else {
-      options = [...Object.values(RuQueryOperator), '[', ']']
-    }
-
-    // console.log(getCursorPosition())
-
-    // reloading components only when options have changed
-    if (JSON.stringify(options) !== JSON.stringify(oldOptions)) {
-      oldOptions = options
-      reloadComponent().then()
-    }
-
-  }
 
   ///////////////////////////////////////////////////////////////////
   //  Lifecycle hooks
@@ -96,6 +66,7 @@
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
+  // TODO: use it
   function handleEnter(event: CustomEvent | KeyboardEvent) {
     console.log("lol")
     // Handling keypress
@@ -110,9 +81,17 @@
     }
   }
   
-  function onSelectAutocompleteOption() {
+  function onSelectSuggestion() {
+    // Inserting suggestion after cursor position
+		const leftPart = rawQuery.substring(0, cursorPosition).trim()
+		const rigthPart = rawQuery.substring(cursorPosition).trim()
+
+    rawQuery = `${leftPart} ${autocompleteValue} ${rigthPart}`
+
+    // Putting cursor after suggestion
+    setCursorPosition(leftPart.length + 1 + autocompleteValue.length)
+
     // Consuming autocomplete value
-    rawQuery = `${rawQuery} ${autocompleteValue} `
     autocompleteValue = ''
   }
 
@@ -132,15 +111,27 @@
       .querySelector("#searchbar")
       .querySelector("input")
       .setSelectionRange(position, position)
+
+    updateCursorPosition()
   } 
 
   function updateCursorPosition() {
     cursorPosition = getCursorPosition()
+    onUpdateCursorPosition()
+  }
+
+  function onUpdateCursorPosition() {
+    suggestions = createSuggestions(rawQuery, cursorPosition)
+
+    // Reloading components only when suggestions have changed
+    if (JSON.stringify(suggestions) !== JSON.stringify(oldsuggestions)) {
+      oldsuggestions = suggestions
+      reloadComponent().then(() => setCursorPosition(cursorPosition))
+    }
   }
 
   /**
-  *  reloading whole component cause Autocomplete component
-  *  does not caches options prop
+  *  reloading whole component cause Autocomplete component caches suggestions prop
   */
   async function reloadComponent() {
     hotLoader = {}

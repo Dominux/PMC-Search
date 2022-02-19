@@ -13,12 +13,18 @@ export default class QueryBuilder {
 	 *  human AND protein OR apple OR [human AND [apple OR rat]] AND sugar AND [breast cancer AND lol]
 	 */
 	public static parseToTokens(rawQuery: string): Array<string> {
-		// Putting space after every '[' and before every ']' symbol
-		rawQuery = rawQuery.replaceAll('[', '[ ')
-		rawQuery = rawQuery.replaceAll(']', ' ]')
-
-		return rawQuery.trim().split(' ')
+		return QueryBuilder
+      .addSpacesNearBrackets(rawQuery)
+      .trim()
+      .split(' ')
 	}
+
+  public static addSpacesNearBrackets(text: string): string {
+		// Putting space after every '[' and before every ']' symbol
+		return text
+      .replaceAll('[', ' [ ')
+      .replaceAll(']', ' ] ')
+  }
 
 	private compileTokens(tokens: Array<string>): Array<QueryElement> {
 		let openedBracketsAmount = 0
