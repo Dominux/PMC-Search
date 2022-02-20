@@ -3,7 +3,7 @@
     <Autocomplete
       combobox 
       options={suggestions}
-      style="width: 100%;"
+      style="width: 89%;"
       bind:value={autocompleteValue}
       bind:text={autocompleteValue}
       on:SMUIAutocomplete:selected={onSelectSuggestion}
@@ -17,15 +17,13 @@
         bind:value={rawQuery}
         on:keyup={updateCursorPosition}
         on:click={updateCursorPosition}
-      >
-        <span slot="trailingIcon" on:click|stopPropagation={runSearch}>
-          <Fab color="primary"> 
-            <Icon class="material-icons">search</Icon>
-          </Fab>
-        </span>
-      </Textfield>
+      />
     </Autocomplete>
   {/key}
+
+  <Fab color="primary" on:click={runSearch}> 
+    <Icon class="material-icons">search</Icon>
+  </Fab>
 </div>
 
 <script lang="ts">
@@ -161,3 +159,9 @@
     })
   }
 </script>
+
+<style>
+  #searchbar {
+    display: flex;
+  }
+</style>
