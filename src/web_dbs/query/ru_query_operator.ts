@@ -1,8 +1,9 @@
 import QueryOperator from "./query_operator";
 
+// WARNING: Don't change variants order! Regex isn't the best and doesn't handle it
 enum RuQueryOperator {
-  And = 'и',
   Or = 'или',
+  And = 'и',
   Not = 'не',
 }
 
