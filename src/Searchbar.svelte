@@ -1,5 +1,5 @@
 <div id="searchbar">
-  {#key hotLoader}
+  {#key reloader}
     <Autocomplete
       combobox 
       options={suggestions}
@@ -48,8 +48,9 @@
   let cursorPosition: number
   let rawQuery = ''
   let suggestions = []
-  let oldsuggestions = []
-  let hotLoader = {}
+  let oldSuggestions = []
+  let reloader = {}
+  let isAfterSelection = false
 
   ///////////////////////////////////////////////////////////////////
   //  Lifecycle hooks
@@ -89,10 +90,14 @@
     rawQuery = `${leftPart} ${autocompleteValue} ${rigthPart}`
 
     // Putting cursor after suggestion
-    setCursorPosition(leftPart.length + 1 + autocompleteValue.length)
+    const position = leftPart.length + 1 + autocompleteValue.length
+    setCursorPosition(position)
+    updateSuggestions()
 
     // Consuming autocomplete value
     autocompleteValue = ''
+
+    isAfterSelection = true
   }
 
   function getCursorPosition(): number {
@@ -112,21 +117,31 @@
       .querySelector("input")
       .setSelectionRange(position, position)
 
-    updateCursorPosition()
+    cursorPosition = position
   } 
 
   function updateCursorPosition() {
+    if (isAfterSelection) {
+      // Suppresing keyup after selection
+      setCursorPosition(cursorPosition)
+      isAfterSelection = false
+      return
+    }
+
     cursorPosition = getCursorPosition()
-    onUpdateCursorPosition()
+    updateSuggestions()
   }
 
-  function onUpdateCursorPosition() {
+  function updateSuggestions() {
     suggestions = createSuggestions(rawQuery, cursorPosition)
 
     // Reloading components only when suggestions have changed
-    if (JSON.stringify(suggestions) !== JSON.stringify(oldsuggestions)) {
-      oldsuggestions = suggestions
-      reloadComponent().then(() => setCursorPosition(cursorPosition))
+    if (JSON.stringify(suggestions) !== JSON.stringify(oldSuggestions)) {
+      oldSuggestions = suggestions
+      reloadComponent().then(() => {
+        textField.focus()
+        setCursorPosition(cursorPosition)
+      })
     }
   }
 
@@ -134,9 +149,8 @@
   *  reloading whole component cause Autocomplete component caches suggestions prop
   */
   async function reloadComponent() {
-    hotLoader = {}
+    reloader = {}
     await tick()
-    textField.focus()
   }
 
   function runSearch() {
