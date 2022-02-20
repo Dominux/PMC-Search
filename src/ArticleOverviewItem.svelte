@@ -1,25 +1,32 @@
 <div class="card-wrapper">
-  <Card elevation={4}>
+  <Card elevation={6}>
     <Content class="mdc-typography--body2">
+
+      <!-- Title -->
       <h2 class="mdc-typography--headline6" style="margin-top: 0; font-size: 1.2rem;">
         <a href={articleOverview.url.toString()}>{articleOverview.title}</a>
       </h2>
 
+      <!-- Body -->
       {articleOverviewBody} 
       <span class="readmore-toggle" on:click={() => toShowFullBody = !toShowFullBody}>
         {toShowFullBody ? "  Свернуть" : "  Читать ещё"}
       </span>
 
-      <h3
-        class="mdc-typography--subtitle2"
-        style="margin-bottom: 0; color: #888; font-size: 1rem;"
-      >
-        Здесь должны быть авторы
-      </h3>
+      <!-- Authors and bibliopraphic sht -->
+      <div style="margin-top: 1rem;">
+        {#each articleOverview.authors as author}
+          <!-- using {', '} cause using ,&#32; doesn't work -->
+          <a href={author.url.toString()}>{author.name}</a>{', '}
+        {/each}
+        {articleOverview.bibliographicData}
+      </div>
 
+      <!-- Toggle translation -->
       <Fab on:click={() => toggleTranslation()} mini touch>
         <Icon class="material-icons">translate</Icon>
       </Fab>
+
     </Content>
   </Card>
 </div>
@@ -62,7 +69,9 @@
 <style>
   .card-wrapper {
     margin: 1rem 10%;
-    width: 500px;
+    min-width: 300px;
+    width: 60%;
+    max-width: 1000px;
   }
 
   .readmore-toggle {

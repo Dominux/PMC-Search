@@ -1,4 +1,4 @@
-import { ArticleOverview } from '../article'
+import { ArticleAuthor, ArticleOverview } from '../article'
 import type Article from '../article'
 
 export default class PMCArticleParser {
@@ -47,13 +47,13 @@ export default class PMCArticleParser {
 			}
 		}
 
-    // Getting authors and publisher info
+		// Getting authors and bibliographic data
+		const authors = Array.from(
+			doc.querySelectorAll('.contrib-group.fm-author > a')
+		).map((a: HTMLLinkElement) => new ArticleAuthor(a.textContent, a.href))
 
+    const bibliographicData = doc.querySelector('.fm-citation').textContent
 
-		return new ArticleOverview(
-      article.id, 
-      title, 
-      body,
-    )
+		return new ArticleOverview(article.id, title, body, authors, bibliographicData)
 	}
 }

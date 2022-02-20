@@ -69,7 +69,7 @@
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = (await pmcClient.getIds(query.rawQuery)).slice(0, 100)
+		let pmcids = (await pmcClient.getIds(query.rawQuery)).slice(0, 30)
     articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingAndQueryMatchingArticles
