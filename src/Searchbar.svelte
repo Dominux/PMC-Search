@@ -15,7 +15,7 @@
         style="width: 100%;"
         bind:this={textField}
         bind:value={rawQuery}
-        on:keyup={updateCursorPosition}
+        on:keyup={handleOnKeyUp}
         on:click={updateCursorPosition}
       />
     </Autocomplete>
@@ -44,13 +44,14 @@
   const dispatch = createEventDispatcher()
 
   let textField: TextfieldComponentDev
-  let autocompleteValue = ''
-  let cursorPosition: number
+  let autocompleteValue = ''    // value to consume suggestions from SMUI Autocomplete at the right place
+  let cursorPosition: number    // value to control where cursor should be and to generate proper suggestions
   let rawQuery = ''
   let suggestions = []
   let oldSuggestions = []
-  let reloader = {}
-  let isAfterSelection = false
+  let reloader = {}             // value to reload components, cause SMUI Autocomplete use options prop as const
+  let isAfterSelection = false  // value to use after selection hook (to set cursor at right position)
+  let isSearchOnEnterDisabled = false
 
   ///////////////////////////////////////////////////////////////////
   //  Lifecycle hooks
@@ -67,18 +68,24 @@
   //  Functions
   ///////////////////////////////////////////////////////////////////
 
-  // TODO: use it
-  function handleEnter(event: CustomEvent | KeyboardEvent) {
-    console.log("lol")
-    // Handling keypress
+  function handleOnKeyUp(event: CustomEvent | KeyboardEvent) {
     event = event as KeyboardEvent
-    if (event.key === 'Enter') {
-      // Unfocusing element
-      const target = event.target as HTMLElement 
-      target.blur()
+    
+    switch (event.key) {
+      case 'Enter':
 
-      // Running search
-      runSearch()
+        if (!isSearchOnEnterDisabled) {
+          // Unfocusing element
+          textField.blur()
+
+          // Running search
+          runSearch()
+        }
+
+        isSearchOnEnterDisabled = false
+        break
+      default:
+        updateCursorPosition()
     }
   }
   
@@ -98,6 +105,22 @@
     autocompleteValue = ''
 
     isAfterSelection = true
+    
+    // Setting this cause we can't set event.stopPropagation() right in SMUI Autocomplete
+    isSearchOnEnterDisabled = true
+  }
+
+  function updateSuggestions() {
+    suggestions = createSuggestions(rawQuery, cursorPosition)
+
+    // Reloading components only when suggestions have changed
+    if (JSON.stringify(suggestions) !== JSON.stringify(oldSuggestions)) {
+      oldSuggestions = suggestions
+      reloadComponent().then(() => {
+        textField.focus()
+        setCursorPosition(cursorPosition)
+      })
+    }
   }
 
   function getCursorPosition(): number {
@@ -132,17 +155,11 @@
     updateSuggestions()
   }
 
-  function updateSuggestions() {
-    suggestions = createSuggestions(rawQuery, cursorPosition)
-
-    // Reloading components only when suggestions have changed
-    if (JSON.stringify(suggestions) !== JSON.stringify(oldSuggestions)) {
-      oldSuggestions = suggestions
-      reloadComponent().then(() => {
-        textField.focus()
-        setCursorPosition(cursorPosition)
-      })
-    }
+  function isUserInMenu(): boolean {
+    const lol = document
+      .querySelectorAll('.smui-autocomplete__menu > ul > li.mdc-deprecated-list-item--activated')
+    console.log(lol)
+    return lol.length > 0
   }
 
   /**
