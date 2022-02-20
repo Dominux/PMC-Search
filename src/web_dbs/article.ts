@@ -25,8 +25,8 @@ export class ArticleAuthor {
   readonly url: URL
 
 	constructor(readonly name: string, url: string) {
-    const link = new URL(url)
-    link.hostname = NCBI_BASEURL
-    this.url = link
+    // NOTE: in localhost url isn't proper cause there we have to remove port and change protocol
+    this.url = new URL(url)
+    this.url.hostname = NCBI_BASEURL
   }
 }
