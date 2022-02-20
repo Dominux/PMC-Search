@@ -16,10 +16,10 @@
         bind:this={textField}
         bind:value={rawQuery}
         on:keyup={updateCursorPosition}
-        on:click={() => {console.log('textfield click'); updateCursorPosition()}}
+        on:click={updateCursorPosition}
       >
         <span slot="trailingIcon" on:click|stopPropagation={runSearch}>
-          <Fab color="primary" > 
+          <Fab color="primary"> 
             <Icon class="material-icons">search</Icon>
           </Fab>
         </span>

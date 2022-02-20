@@ -17,7 +17,7 @@
       <div style="margin-top: 1rem;">
         {#each articleOverview.authors as author}
           <!-- using {', '} cause using ,&#32; doesn't work -->
-          <a href={author.url.toString()}>{author.name}</a>{', '}
+          <a href={author.url.toString()} target="_blank">{author.name}</a>{', '}
         {/each}
         {articleOverview.bibliographicData}
       </div>
