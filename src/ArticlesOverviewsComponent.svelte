@@ -31,34 +31,44 @@
         {/each}
       </ul>
     {/if}
+
   </div>
+
+  <InfiniteScroll on:scroll={fetchNextBatch}/>
 </div>
 
 <script lang="ts">
+  import InfiniteScroll from "svelte-infinite-scrolling/src/InfiniteScroll.svelte"
+
   import ArticleOverviewItem from './ArticleOverviewItem.svelte'
     
   import type {ArticleOverview, ID} from './web_dbs/article'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
+  import { DEFAULT_BATCH_SIZE } from './web_dbs/constants'
 
   export let originalArticles: Array<ID>
   export let reviewArticles: Array<ID>
   export let toShowReviewArticlesOverviews: boolean
 
-  let batchSize = 20
+  let batchSize = DEFAULT_BATCH_SIZE
   let oldArticlesAmount = 0
   let originalArticlesOverviews: Array<ArticleOverview>
   let reviewArticlesOverviews: Array<ArticleOverview>
 
   const pmcParser = new PMCArticleParser()
 
-  $: if(oldArticlesAmount !== originalArticles.length + reviewArticles.length) {
+  // On updating articles
+  $: if (oldArticlesAmount !== originalArticles.length + reviewArticles.length) {
     originalArticlesOverviews = []
     reviewArticlesOverviews = []
     fetchNextBatch().then()    
+
+    oldArticlesAmount = originalArticles.length + reviewArticles.length
   }
 
   async function fetchNextBatch(): Promise<void> {
+    console.log("lol")
     const newOriginalArticlesOverviews = await getArticlesOverviews(
       originalArticles.slice(originalArticlesOverviews.length, originalArticlesOverviews.length + batchSize)
     )
@@ -67,6 +77,8 @@
     )
     originalArticlesOverviews = [...originalArticlesOverviews, ...newOriginalArticlesOverviews]
     reviewArticlesOverviews = [...reviewArticlesOverviews, ...newReviewArticlesOverviews]
+
+    console.log(originalArticlesOverviews, reviewArticlesOverviews)
   }
   
   async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {
