@@ -144,22 +144,19 @@
   } 
 
   function updateCursorPosition() {
-    if (isAfterSelection) {
+    // If after selection and cursor not at the end of the query
+    if (isAfterSelection && rawQuery.trimEnd().length > cursorPosition + 2) {
       // Suppresing keyup after selection
       setCursorPosition(cursorPosition)
+
       isAfterSelection = false
       return
     }
 
+    isAfterSelection = false
+
     cursorPosition = getCursorPosition()
     updateSuggestions()
-  }
-
-  function isUserInMenu(): boolean {
-    const lol = document
-      .querySelectorAll('.smui-autocomplete__menu > ul > li.mdc-deprecated-list-item--activated')
-    console.log(lol)
-    return lol.length > 0
   }
 
   /**
