@@ -1,5 +1,5 @@
 <div>
-  {#if [SearchingState.GettingIds, SearchingState.GettingArticlesOverviews].includes(searchingState)}
+  {#if searchingState === SearchingState.GettingIds}
     <CircularProgress
       style="height: 32px; width: 32px;"
       indeterminate

@@ -1,6 +1,10 @@
 <main>
   <div class="searchbar">
     <SearchBar on:search={event => search(event.detail.rawQuery)}/>
+    <FormField>
+      <Checkbox bind:checked={toShowReviewArticlesOverviews}/>
+      <span slot="label">{toShowReviewArticlesOverviews ? 'Скрыть' : 'Показать'} обзорные статьи</span>
+    </FormField>
   </div>
 
   <div style="min-width: 60%;">
@@ -13,28 +17,23 @@
   </div>
 
   {#if state === SearchingState.Completed}
-    <div style="margin: 0 50px">
-      <h3>
-        По вашему запросу найдено 
-        <strong>{originalArticles.length}</strong> оригинальных и
-        <strong>{reviewArticles.length}</strong> обзорных статей
-      </h3>
-      <ul class="results-list">
-        {#each articlesOverviews as articleOverview}
-          <li>
-            <ArticleOverviewItem articleOverview={articleOverview}/>
-          </li>
-        {/each}
-    </div>
+    <ArticlesOverviewsComponent
+      {originalArticles}
+      {reviewArticles} 
+      {toShowReviewArticlesOverviews}
+    />
   {/if}
 </main>
 
 <script lang="ts">
+  import Checkbox from '@smui/checkbox'
+  import FormField from '@smui/form-field'
+
   import Loading from './Loading.svelte'
-  import ArticleOverviewItem from './ArticleOverviewItem.svelte';
-  import SearchBar from "./Searchbar.svelte";
+  import SearchBar from "./Searchbar.svelte"
+  import ArticlesOverviewsComponent from './ArticlesOverviewsComponent.svelte'
     
-  import type {ArticleOverview, ID} from './web_dbs/article'
+  import type { ID } from './web_dbs/article'
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
@@ -50,7 +49,7 @@
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
-  let articlesOverviews: Array<ArticleOverview>
+  let toShowReviewArticlesOverviews = true
 
   ///////////////////////////////////////////////////////////////////
   //  Functions
@@ -107,33 +106,13 @@
       
 		console.log("Results:", {originalArticles, reviewArticles})
 
-    state = SearchingState.GettingArticlesOverviews
-
-    articlesOverviews = await getArticlesOverviews(originalArticles)
-
     state = SearchingState.Completed
 	}
-
-  async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
-    const article = await pmcClient.getArticleById(articleID)
-    return pmcParser.getArticleOverview(article)
-  }
-
-  async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {
-    return await Promise.all(articlesIds.map(async id => await getArticleOverview(id)))
-  }
 </script>
 
 <style>
 .searchbar {
   width: 60%;
   margin: 3rem auto 0;
-  /* display: flex;
-  justify-self: center; */
-}
-
-.results-list {
-  list-style-type: none;
-  padding: 0;
 }
 </style>

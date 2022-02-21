@@ -35,6 +35,7 @@
   import Card, {Content} from '@smui/card'
   import { Icon } from '@smui/common'
   import Fab from '@smui/fab'
+import { compute_rest_props } from 'svelte/internal';
 
   import type { ArticleOverview } from './web_dbs/article' 
   import { ARTICLE_OVERVIEW_BODY_LIMIT } from "./web_dbs/constants";
@@ -70,7 +71,7 @@
   .card-wrapper {
     margin: 1rem 10%;
     min-width: 300px;
-    width: 60%;
+    width: 40%;
     max-width: 1000px;
   }
 
