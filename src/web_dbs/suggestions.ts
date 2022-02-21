@@ -18,8 +18,8 @@ export class SuggestionCreater {
 		}
 
 		// Getting words between cursor
-		const previousWord = leftPart.trim().split(' ').slice(-1)[0] || ''
-		const nextWord = rigthPart.trim().split(' ')[0] || ''
+		const previousWord = leftPart.trim().split(/\s+/).slice(-1)[0] || ''
+		const nextWord = rigthPart.trim().split(/\s+/)[0] || ''
 
 		const operators = Object.values<string>(RuQueryOperator)
 

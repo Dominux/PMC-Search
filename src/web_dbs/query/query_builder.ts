@@ -16,7 +16,7 @@ export default class QueryBuilder {
 		return QueryBuilder
       .addSpacesNearBrackets(rawQuery)
       .trim()
-      .split(' ')
+      .split(/\s+/) // any number of spaces
 	}
 
   public static addSpacesNearBrackets(text: string): string {
