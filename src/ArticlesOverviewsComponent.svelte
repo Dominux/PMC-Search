@@ -34,11 +34,11 @@
 
   </div>
 
-  <InfiniteScroll on:scroll={fetchNextBatch}/>
+  <InfiniteScroll bottomHeight={1000} on:scroll={fetchNextBatch}/>
 </div>
 
 <script lang="ts">
-  import InfiniteScroll from "svelte-infinite-scrolling/src/InfiniteScroll.svelte"
+  import InfiniteScroll from "./InfiniteScroll.svelte"
 
   import ArticleOverviewItem from './ArticleOverviewItem.svelte'
     
@@ -52,6 +52,7 @@
   export let toShowReviewArticlesOverviews: boolean
 
   let batchSize = DEFAULT_BATCH_SIZE
+  let is_fetching = false
   let oldArticlesAmount = 0
   let originalArticlesOverviews: Array<ArticleOverview>
   let reviewArticlesOverviews: Array<ArticleOverview>
@@ -68,17 +69,25 @@
   }
 
   async function fetchNextBatch(): Promise<void> {
-    console.log("lol")
+    if (is_fetching) {
+      return
+    }
+
+    is_fetching = true
+
     const newOriginalArticlesOverviews = await getArticlesOverviews(
       originalArticles.slice(originalArticlesOverviews.length, originalArticlesOverviews.length + batchSize)
     )
     const newReviewArticlesOverviews = await getArticlesOverviews(
       reviewArticles.slice(reviewArticlesOverviews.length, reviewArticlesOverviews.length + batchSize)
     )
+
     originalArticlesOverviews = [...originalArticlesOverviews, ...newOriginalArticlesOverviews]
     reviewArticlesOverviews = [...reviewArticlesOverviews, ...newReviewArticlesOverviews]
 
     console.log(originalArticlesOverviews, reviewArticlesOverviews)
+
+    is_fetching = false
   }
   
   async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {

@@ -37,7 +37,7 @@
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
-  import SearchingState from './web_dbs/searching_state'
+  import SearchingState from './web_dbs/states'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables

@@ -35,7 +35,7 @@ export default class PMCArticleParser {
 		const title = doc.querySelector('h1.content-title').textContent
 
 		// Getting Abstract section
-		let body: string
+		let body = ''
 		for (const h2 of doc.querySelectorAll('h2')) {
 			if (h2.textContent.toLowerCase().includes('abstract')) {
 				const abstract = h2.parentElement
