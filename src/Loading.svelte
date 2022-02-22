@@ -14,7 +14,7 @@
   import CircularProgress from '@smui/circular-progress'
   import LinearProgress from '@smui/linear-progress'
 
-  import SearchingState from './web_dbs/searching_state'
+  import SearchingState from './web_dbs/states'
 
   export let buffer
   export let originalArticlesAmount

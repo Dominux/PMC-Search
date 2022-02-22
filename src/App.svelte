@@ -3,7 +3,7 @@
     <SearchBar on:search={event => search(event.detail.rawQuery)}/>
     <FormField>
       <Checkbox bind:checked={toShowReviewArticlesOverviews}/>
-      <span slot="label">{toShowReviewArticlesOverviews ? 'Скрыть' : 'Показать'} обзорные статьи</span>
+      <span slot="label">Показать обзорные статьи</span>
     </FormField>
   </div>
 
@@ -37,7 +37,7 @@
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
-  import SearchingState from './web_dbs/searching_state'
+  import SearchingState from './web_dbs/states'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables
@@ -68,7 +68,7 @@
 		const query = new Query(rawQuery)
 
 		// 2. Getting ids
-		let pmcids = (await pmcClient.getIds(query.rawQuery)).slice(0, 30)
+		let pmcids = (await pmcClient.getIds(query.rawQuery)).slice(0, 100)
     articlesAmount = pmcids.length
 
 		state = SearchingState.GettingAndParsingAndQueryMatchingArticles
