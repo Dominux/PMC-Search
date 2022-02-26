@@ -1,6 +1,6 @@
 enum SearchingState {
   GettingIds,
-  GettingAndParsingAndQueryMatchingArticles,
+  Processing,
   Completed,
 }
 
