@@ -4,7 +4,7 @@
       style="height: 32px; width: 32px;"
       indeterminate
     />
-  {:else if searchingState === SearchingState.GettingAndParsingAndQueryMatchingArticles}
+  {:else if searchingState === SearchingState.Processing}
     {originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
     <LinearProgress {progress} buffer={progress}/>
   {/if}
