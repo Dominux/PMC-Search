@@ -46,7 +46,7 @@
   let textField: TextfieldComponentDev
   let autocompleteValue = ''    // value to consume suggestions from SMUI Autocomplete at the right place
   let cursorPosition: number    // value to control where cursor should be and to generate proper suggestions
-  let rawQuery = ''
+  export let rawQuery = ''
   let suggestions = []
   let oldSuggestions = []
   let reloader = {}             // value to reload components, cause SMUI Autocomplete use options prop as const

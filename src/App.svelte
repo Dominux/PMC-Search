@@ -1,6 +1,16 @@
 <main>
   <div class="searchbar">
-    <SearchBar on:search={event => search(event.detail.rawQuery)}/>
+    <SearchBar 
+      bind:rawQuery={rawQuery}
+      on:search={event => search(event.detail.rawQuery)}
+    />
+
+    <SearchHistory on:useRecord={event => {
+      rawQuery = event.detail.rawQuery
+      originalArticles = event.detail.results.original
+      reviewArticles = event.detail.results.review
+      state = SearchingState.Completed
+    }}/>
 
     <Filters
       bind:minPubDate
@@ -41,12 +51,15 @@
   import Loading from './Loading.svelte'
   import SearchBar from "./Searchbar.svelte"
   import ArticlesOverviewsComponent from './ArticlesOverviewsComponent.svelte'
+  import SearchHistory from './SearchHistory.svelte'
     
   import type { ID } from './web_dbs/article'
   import Query from './web_dbs/query/query'
   import pmcClient from './web_dbs/webdbs_clients/pmc_client'
   import PMCArticleParser from './web_dbs/parsers/pmc_parser'
   import SearchingState from './web_dbs/states'
+  import history from './stores/history_store'
+  import type { HistoryRecord } from './stores/history_store'
 
   ///////////////////////////////////////////////////////////////////
   //  Variables
@@ -55,6 +68,7 @@
   const pmcParser = new PMCArticleParser()
 
   let state: SearchingState
+  let rawQuery: string
   let articlesAmount = 0
   let originalArticles: Array<ID> = []
   let reviewArticles: Array<ID> = []
@@ -129,6 +143,16 @@
     }
       
 		console.log("Results:", {originalArticles, reviewArticles})
+
+    // Saving raw query with results in history
+    const record: HistoryRecord = {
+      "rawQuery": rawQuery,
+      "results": {
+        "original": originalArticles,
+        "review": reviewArticles
+      }
+    }
+    history.createRecord(record)
 
     state = SearchingState.Completed
 	}

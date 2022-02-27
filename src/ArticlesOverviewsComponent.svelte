@@ -85,8 +85,6 @@
     originalArticlesOverviews = [...originalArticlesOverviews, ...newOriginalArticlesOverviews]
     reviewArticlesOverviews = [...reviewArticlesOverviews, ...newReviewArticlesOverviews]
 
-    console.log(originalArticlesOverviews, reviewArticlesOverviews)
-
     is_fetching = false
   }
   
