@@ -1,115 +1,137 @@
-<div style="margin: 0 50px">
-  <h3>
-    По вашему запросу найдено 
-    <strong>{originalArticles.length}</strong> оригинальных и
-    <strong>{reviewArticles.length}</strong> обзорных статей
-  </h3>
-
-  <!-- TODO: change to CSS Grid -->
-  <div class="flex-results">
-    <h2 class="header">Оригинальные</h2>
-    <h2 class="header">Обзорные</h2>
-  </div>
-
-  <div class="flex-results">
-    <!-- Original articles -->
-    <ul class="results-list">
-      {#each originalArticlesOverviews as articleOverview}
-        <li>
-          <ArticleOverviewItem {articleOverview}/>
-        </li>
-      {/each}
-    </ul>
-
-    <!-- Review articles -->
-    {#if toShowReviewArticlesOverviews}
-      <ul class="results-list">
-        {#each reviewArticlesOverviews as articleOverview}
-          <li>
-            <ArticleOverviewItem {articleOverview}/>
-          </li>
-        {/each}
-      </ul>
-    {/if}
-
-  </div>
-
-  <InfiniteScroll bottomHeight={1000} on:scroll={fetchNextBatch}/>
-</div>
-
 <script lang="ts">
-  import InfiniteScroll from "./InfiniteScroll.svelte"
+	import InfiniteScroll from './InfiniteScroll.svelte'
 
-  import ArticleOverviewItem from './ArticleOverviewItem.svelte'
-    
-  import type {ArticleOverview, ID} from './web_dbs/article'
-  import PMCArticleParser from './web_dbs/parsers/pmc_parser'
-  import pmcClient from './web_dbs/webdbs_clients/pmc_client'
-  import { DEFAULT_BATCH_SIZE } from './web_dbs/constants'
+	import ArticleOverviewItem from './ArticleOverviewItem.svelte'
 
-  export let originalArticles: Array<ID>
-  export let reviewArticles: Array<ID>
-  export let toShowReviewArticlesOverviews: boolean
+	import type { ArticleOverview, ID } from './web_dbs/article'
+	import PMCArticleParser from './web_dbs/parsers/pmc_parser'
+	import pmcClient from './web_dbs/webdbs_clients/pmc_client'
+	import { DEFAULT_BATCH_SIZE } from './web_dbs/constants'
+  import ExportToDataTable from './ExportToDataTable.svelte'
 
-  let batchSize = DEFAULT_BATCH_SIZE
-  let is_fetching = false
-  let oldArticlesAmount = 0
-  let originalArticlesOverviews: Array<ArticleOverview>
-  let reviewArticlesOverviews: Array<ArticleOverview>
+	export let originalArticles: Array<ID>
+	export let reviewArticles: Array<ID>
+	export let toShowReviewArticlesOverviews: boolean
 
-  const pmcParser = new PMCArticleParser()
+	let batchSize = DEFAULT_BATCH_SIZE
+	let is_fetching = false
+	let oldArticlesAmount = 0
+	let originalArticlesOverviews: Array<ArticleOverview> = []
+	let reviewArticlesOverviews: Array<ArticleOverview> = []
 
-  // On updating articles
-  $: if (oldArticlesAmount !== originalArticles.length + reviewArticles.length) {
-    originalArticlesOverviews = []
-    reviewArticlesOverviews = []
-    fetchNextBatch().then()    
+	const pmcParser = new PMCArticleParser()
 
-    oldArticlesAmount = originalArticles.length + reviewArticles.length
-  }
+	// On updating articles
+	$: if (
+		oldArticlesAmount !==
+		originalArticles.length + reviewArticles.length
+	) {
+		originalArticlesOverviews = []
+		reviewArticlesOverviews = []
+		fetchNextBatch().then()
 
-  async function fetchNextBatch(): Promise<void> {
-    if (is_fetching) {
-      return
-    }
+		oldArticlesAmount = originalArticles.length + reviewArticles.length
+	}
 
-    is_fetching = true
+	async function fetchNextBatch(): Promise<void> {
+		if (is_fetching) {
+			return
+		}
 
-    const newOriginalArticlesOverviews = await getArticlesOverviews(
-      originalArticles.slice(originalArticlesOverviews.length, originalArticlesOverviews.length + batchSize)
-    )
-    const newReviewArticlesOverviews = await getArticlesOverviews(
-      reviewArticles.slice(reviewArticlesOverviews.length, reviewArticlesOverviews.length + batchSize)
-    )
+		is_fetching = true
 
-    originalArticlesOverviews = [...originalArticlesOverviews, ...newOriginalArticlesOverviews]
-    reviewArticlesOverviews = [...reviewArticlesOverviews, ...newReviewArticlesOverviews]
+		const newOriginalArticlesOverviews = await getArticlesOverviews(
+			originalArticles.slice(
+				originalArticlesOverviews.length,
+				originalArticlesOverviews.length + batchSize
+			)
+		)
+		const newReviewArticlesOverviews = await getArticlesOverviews(
+			reviewArticles.slice(
+				reviewArticlesOverviews.length,
+				reviewArticlesOverviews.length + batchSize
+			)
+		)
 
-    is_fetching = false
-  }
-  
-  async function getArticlesOverviews(articlesIds: Array<ID>): Promise<Array<ArticleOverview>> {
-    return await Promise.all(articlesIds.map(async id => await getArticleOverview(id)))
-  }
+		originalArticlesOverviews = [
+			...originalArticlesOverviews,
+			...newOriginalArticlesOverviews,
+		]
+		reviewArticlesOverviews = [
+			...reviewArticlesOverviews,
+			...newReviewArticlesOverviews,
+		]
 
-  async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
-    const article = await pmcClient.getArticleById(articleID)
-    return pmcParser.getArticleOverview(article)
-  }
+		is_fetching = false
+	}
+
+	async function getArticlesOverviews(
+		articlesIds: Array<ID>
+	): Promise<Array<ArticleOverview>> {
+		return await Promise.all(
+			articlesIds.map(async (id) => await getArticleOverview(id))
+		)
+	}
+
+	async function getArticleOverview(articleID: ID): Promise<ArticleOverview> {
+		const article = await pmcClient.getArticleById(articleID)
+		return pmcParser.getArticleOverview(article)
+	}
 </script>
 
+<div style="margin: 0 50px">
+	<h3>
+		По вашему запросу найдено
+		<strong>{originalArticles.length}</strong> оригинальных и
+		<strong>{reviewArticles.length}</strong> обзорных статей
+	</h3>
+
+	<!-- TODO: change to CSS Grid -->
+	<div class="flex-results">
+		<h2 class="header">Оригинальные</h2>
+		<h2 class="header">Обзорные</h2>
+	</div>
+
+	<div class="flex-results">
+		<!-- Original articles -->
+  
+    <ExportToDataTable articles={originalArticlesOverviews}/>
+		<ul class="results-list">
+			{#each originalArticlesOverviews as articleOverview}
+				<li>
+					<ArticleOverviewItem {articleOverview} />
+				</li>
+			{/each}
+		</ul>
+
+		<!-- Review articles -->
+		{#if toShowReviewArticlesOverviews}
+    <ExportToDataTable articles={originalArticlesOverviews}/>
+			<ul class="results-list">
+				{#each reviewArticlesOverviews as articleOverview}
+					<li>
+						<ArticleOverviewItem {articleOverview} />
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</div>
+
+	<InfiniteScroll bottomHeight={1000} on:scroll={fetchNextBatch} />
+</div>
+
 <style>
-  .flex-results {
-    display: flex;
-  }
+	.flex-results {
+		display: flex;
+	}
 
-  .results-list {
-    list-style-type: none;
-    padding: 0;
-  }
+	.results-list {
+		list-style-type: none;
+		padding: 0;
+	}
 
-  .header {
-    width: 50%;
-    text-align: center;
-  }
+	.header {
+		width: 50%;
+		text-align: center;
+	}
 </style>
