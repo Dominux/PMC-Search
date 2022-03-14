@@ -7,6 +7,7 @@
 	import PMCArticleParser from './web_dbs/parsers/pmc_parser'
 	import pmcClient from './web_dbs/webdbs_clients/pmc_client'
 	import { DEFAULT_BATCH_SIZE } from './web_dbs/constants'
+  import ExportToDataTable from './ExportToDataTable.svelte'
 
 	export let originalArticles: Array<ID>
 	export let reviewArticles: Array<ID>
@@ -15,8 +16,8 @@
 	let batchSize = DEFAULT_BATCH_SIZE
 	let is_fetching = false
 	let oldArticlesAmount = 0
-	let originalArticlesOverviews: Array<ArticleOverview>
-	let reviewArticlesOverviews: Array<ArticleOverview>
+	let originalArticlesOverviews: Array<ArticleOverview> = []
+	let reviewArticlesOverviews: Array<ArticleOverview> = []
 
 	const pmcParser = new PMCArticleParser()
 
@@ -93,6 +94,8 @@
 
 	<div class="flex-results">
 		<!-- Original articles -->
+  
+    <ExportToDataTable articles={originalArticlesOverviews}/>
 		<ul class="results-list">
 			{#each originalArticlesOverviews as articleOverview}
 				<li>
@@ -103,6 +106,7 @@
 
 		<!-- Review articles -->
 		{#if toShowReviewArticlesOverviews}
+    <ExportToDataTable articles={originalArticlesOverviews}/>
 			<ul class="results-list">
 				{#each reviewArticlesOverviews as articleOverview}
 					<li>
