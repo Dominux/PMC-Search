@@ -54,6 +54,9 @@ export default class PMCArticleParser {
 
     const bibliographicData = doc.querySelector('.fm-citation').textContent
 
-		return new ArticleOverview(article.id, title, body, authors, bibliographicData)
+    // Getting keywords
+    const keywords = doc.getElementsByClassName("kwd-text")[0]?.textContent
+
+		return new ArticleOverview(article.id, title, keywords, body, authors, bibliographicData)
 	}
 }

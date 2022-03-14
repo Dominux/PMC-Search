@@ -11,6 +11,7 @@ export class ArticleOverview {
 	constructor(
 		readonly id: ID,
 		readonly title: string,
+    readonly keywords: string,
 		readonly body: string,
 		readonly authors: Array<ArticleAuthor>,
     readonly bibliographicData: string,
