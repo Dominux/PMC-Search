@@ -7,7 +7,7 @@
 	import PMCArticleParser from './web_dbs/parsers/pmc_parser'
 	import pmcClient from './web_dbs/webdbs_clients/pmc_client'
 	import { DEFAULT_BATCH_SIZE } from './web_dbs/constants'
-  import ExportToDataTable from './ExportToDataTable.svelte'
+	import ExportToDataTable from './ExportToDataTable.svelte'
 
 	export let originalArticles: Array<ID>
 	export let reviewArticles: Array<ID>
@@ -79,23 +79,24 @@
 	}
 </script>
 
-<div style="margin: 0 50px">
-	<h3>
+<div style="margin: 0">
+	<h3 class="results-title">
 		По вашему запросу найдено
 		<strong>{originalArticles.length}</strong> оригинальных и
 		<strong>{reviewArticles.length}</strong> обзорных статей
 	</h3>
 
 	<!-- TODO: change to CSS Grid -->
-	<div class="flex-results">
+	<div class="flex-results" style="margin: 0 100px;">
+		<ExportToDataTable articles={originalArticlesOverviews} />
 		<h2 class="header">Оригинальные</h2>
+		<ExportToDataTable articles={originalArticlesOverviews} />
 		<h2 class="header">Обзорные</h2>
 	</div>
 
 	<div class="flex-results">
 		<!-- Original articles -->
-  
-    <ExportToDataTable articles={originalArticlesOverviews}/>
+
 		<ul class="results-list">
 			{#each originalArticlesOverviews as articleOverview}
 				<li>
@@ -106,7 +107,6 @@
 
 		<!-- Review articles -->
 		{#if toShowReviewArticlesOverviews}
-    <ExportToDataTable articles={originalArticlesOverviews}/>
 			<ul class="results-list">
 				{#each reviewArticlesOverviews as articleOverview}
 					<li>
@@ -121,8 +121,14 @@
 </div>
 
 <style>
+	.results-title {
+		text-align: center;
+		font-size: 24px;
+	}
+
 	.flex-results {
 		display: flex;
+		justify-content: space-around;
 	}
 
 	.results-list {

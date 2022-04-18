@@ -80,7 +80,7 @@
 	.card-wrapper {
 		margin: 1rem 10%;
 		min-width: 300px;
-		width: 40%;
+		width: 95%;
 		max-width: 1000px;
 	}
 
