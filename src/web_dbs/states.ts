@@ -1,7 +1,7 @@
 enum SearchingState {
-  GettingIds,
-  Processing,
-  Completed,
+	GettingIds,
+	Processing,
+	Completed,
 }
 
 export default SearchingState

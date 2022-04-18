@@ -4,17 +4,17 @@
 
 	import SearchingState from './web_dbs/states'
 
-	export let buffer
-	export let originalArticlesAmount
-	export let reviewArticlesAmount
-	export let searchingState
+	export let buffer: number
+	export let originalArticlesAmount: number
+	export let reviewArticlesAmount: number
+	export let searchingState: SearchingState
 
 	$: progress = (originalArticlesAmount + reviewArticlesAmount) / buffer
 </script>
 
-<div>
+<div style="text-align: center;">
 	{#if searchingState === SearchingState.GettingIds}
-		<CircularProgress style="height: 32px; width: 32px;" indeterminate />
+		<CircularProgress style="height: 50px; width: 50px; ;" indeterminate />
 	{:else if searchingState === SearchingState.Processing}
 		{originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
 		<LinearProgress {progress} buffer={progress} />

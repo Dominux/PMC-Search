@@ -8,6 +8,7 @@
 	import ArticlesOverviewsComponent from './ArticlesOverviewsComponent.svelte'
 	import SearchHistory from './SearchHistory.svelte'
 
+	import type Article from './web_dbs/article'
 	import type { ID } from './web_dbs/article'
 	import Query from './web_dbs/query/query'
 	import pmcClient from './web_dbs/webdbs_clients/pmc_client'
@@ -27,6 +28,8 @@
 	let articlesAmount = 0
 	let originalArticles: Array<ID> = []
 	let reviewArticles: Array<ID> = []
+	let cachedOriginalArticles: Array<Article> = []
+	let cachedReviewArticles: Array<Article> = []
 	let toShowReviewArticlesOverviews = true
 	let minPubDate: number
 	let maxPubDate: number
@@ -43,6 +46,8 @@
 
 		originalArticles = []
 		reviewArticles = []
+		cachedOriginalArticles = []
+		cachedReviewArticles = []
 
 		state = SearchingState.GettingIds
 
@@ -91,6 +96,10 @@
 					if (query.match(text)) {
 						originalArticles = [...originalArticles, article.id]
 
+						if (cachedOriginalArticles.length < 10) {
+							cachedOriginalArticles.push(article)
+						}
+
 						if (
 							originalArticlesLimit &&
 							originalArticles.length === originalArticlesLimit
@@ -99,6 +108,10 @@
 						}
 					} else {
 						reviewArticles = [...reviewArticles, article.id]
+
+						if (cachedReviewArticles.length < 10) {
+							cachedReviewArticles.push(article)
+						}
 					}
 				})
 			)
@@ -163,6 +176,8 @@
 			{originalArticles}
 			{reviewArticles}
 			{toShowReviewArticlesOverviews}
+			originalArticlesOverviews={cachedOriginalArticles}
+			reviewArticlesOverviews={cachedReviewArticles}
 		/>
 	{/if}
 </main>

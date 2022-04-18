@@ -9,7 +9,7 @@
 
 	export let minPubDate = minPubDateLimit
 	export let maxPubDate = maxPubDateLimit
-	export let articlesLimit = 1000
+	export let articlesLimit = 100
 	export let originalArticlesLimit = 0
 
 	// Auto making original articles limit not bigger than all articles limit
