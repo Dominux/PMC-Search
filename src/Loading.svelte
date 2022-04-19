@@ -12,11 +12,11 @@
 	$: progress = (originalArticlesAmount + reviewArticlesAmount) / buffer
 </script>
 
-<div style="text-align: center;">
+<div style="text-align: center; margin: 0 8rem;">
 	{#if searchingState === SearchingState.GettingIds}
-		<CircularProgress style="height: 50px; width: 50px; ;" indeterminate />
+		<CircularProgress style="height: 50px; width: 50px;" indeterminate />
 	{:else if searchingState === SearchingState.Processing}
-		{originalArticlesAmount}/{reviewArticlesAmount}/{buffer}
-		<LinearProgress {progress} buffer={progress} />
+		Оригинальные: {originalArticlesAmount}&emsp;Обзорные: {reviewArticlesAmount}
+		<LinearProgress {progress} buffer={progress} style="text-align: left;" />
 	{/if}
 </div>

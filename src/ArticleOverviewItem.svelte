@@ -2,6 +2,7 @@
 	import Card, { Content } from '@smui/card'
 	import { Icon } from '@smui/common'
 	import Fab from '@smui/fab'
+	import CircularProgress from '@smui/circular-progress'
 
 	import type { ArticleOverview } from './web_dbs/article'
 	import { ARTICLE_OVERVIEW_BODY_LIMIT } from './web_dbs/constants'
@@ -10,6 +11,7 @@
 	export let articleOverview: ArticleOverview
 
 	let toShowFullBody = false
+	let isPendingTranslating = false
 	let translatedArticleOverview: string
 	let toShowTranslation = false
 
@@ -29,9 +31,13 @@
 		}
 
 		if (!translatedArticleOverview) {
+			isPendingTranslating = true
+
 			translatedArticleOverview = await translationApiClient.translate(
 				articleOverview.body
 			)
+
+			isPendingTranslating = false
 		}
 
 		toShowTranslation = true
@@ -70,7 +76,11 @@
 
 			<!-- Toggle translation -->
 			<Fab on:click={() => toggleTranslation()} mini touch>
-				<Icon class="material-icons">translate</Icon>
+				{#if isPendingTranslating}
+					<CircularProgress style="height: 30px; width: 30px" indeterminate />
+				{:else}
+					<Icon class="material-icons">translate</Icon>
+				{/if}
 			</Fab>
 		</Content>
 	</Card>
